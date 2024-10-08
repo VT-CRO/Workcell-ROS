@@ -8,7 +8,7 @@ Written by Andrew Viola
 
 
 import math
-from gcode import gcode
+from mc2425.gcode import gcode
 
 class partsShelf:
     def __init__(self,slotNumber: int,height: float):
