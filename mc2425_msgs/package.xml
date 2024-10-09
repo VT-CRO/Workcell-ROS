@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>mc2425_msgs</name>
+  <version>0.0.1</version>
+  <description>Message files for mc2425</description>
+  <maintainer email="aviola@vt.edu">andrew</maintainer>
+  <license>Apache-2.0</license>
+
+  <!-- Build tool and dependencies for message generation -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>rosidl_default_generators</build_depend>
+  <exec_depend>rosidl_default_runtime</exec_depend>
+  <member_of_group>rosidl_interface_packages</member_of_group>
+
+  <!-- Export build type and group membership -->
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

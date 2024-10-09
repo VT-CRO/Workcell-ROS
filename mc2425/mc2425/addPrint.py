@@ -1,23 +1,25 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
+from mc2425_msgs.msg import AddPart
+
 
 class addPrint(Node):
     def __init__(self):
         super().__init__('addPrint')
         # Declare and get the parameter for height
-        self.declare_parameter('height', 0)
+        self.declare_parameter('height', 0.0)
         self.declare_parameter('printer', 0)
         self.declare_parameter('name', "")
         self.declare_parameter('author', "")
 
-        heightParam = self.get_parameter('height').get_parameter_value().integer_value
+        heightParam = self.get_parameter('height').get_parameter_value().double_value
         printerNumber = self.get_parameter('printer').get_parameter_value().integer_value
         nameParam = self.get_parameter('name').get_parameter_value().string_value
         authorParam = self.get_parameter('author').get_parameter_value().string_value
 
         # Create publisher
-        self.publisher_ = self.create_publisher(String, 'mainController', 10)
+        self.publisher_ = self.create_publisher(AddPart, 'addPart', 10)
 
         # Set up a timer for async behavior, even if we only publish once
         timer_period = 0.5
@@ -26,10 +28,13 @@ class addPrint(Node):
 
     def publish_once(self,height,number,name,author):
         # Create a customizable string message
-        msg = String()
-        msg.data = f'ADD {number} {name} {author} {height}'
+        msg = AddPart()
+        msg.print_height = float(height)
+        msg.printer_number = int(number)
+        msg.part_name = name
+        msg.author = author
         self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.data)
+        self.get_logger().info(f'Publishing: {msg.printer_number} {msg.print_height}, {msg.part_name} {msg.author}')
 
         # Stop the timer after publishing once
         self.destroy_timer(self.timer)
