@@ -25,4 +25,4 @@ To run the mainController node
 
 To add a part to the shelf
 
-    ros2 run mc2425 addPrint --ros-args -p printer:=<INTEGER> -p height:=<FLOAT> -p name:=<STRING> -p author:=<AUTHOR>
+    ros2 run mc2425 addPrint --ros-args -p printer:=<INTEGER> -p height:=<FLOAT> -p name:=<STRING> -p author:=<STRING>
