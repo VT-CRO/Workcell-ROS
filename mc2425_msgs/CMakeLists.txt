@@ -7,6 +7,7 @@ find_package(rosidl_default_generators REQUIRED)
 # Specify the message files relative to the package root
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/AddPart.msg"
+  "msg/PnPRemoval.msg"
 )
 
 ament_package()

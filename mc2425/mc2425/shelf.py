@@ -92,7 +92,7 @@ class partsShelf:
        """
        Removes the gcode from the shelving unit and pops it from the gcode list
        :param start: Slot number where the gcode starts
-       :return:
+       :return:AddPart.msg
        """
        for key in list(self.parts.keys()):
            if self.parts[key]["Start"] == start:
@@ -101,3 +101,6 @@ class partsShelf:
                self.parts.pop(key)
                return True
        return False
+
+    def shelfChecker(self, shelfNum: int):
+        return self.slots[shelfNum]
