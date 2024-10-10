@@ -15,6 +15,10 @@ Build mc2425 and mc2425_msgs
 
     colcon build --packages-select mc2425 mc2425_msgs
 
+Source the install
+
+    source install/setup.bash
+
 To run the mainController node
 
     ros2 run mc2425 mainController
