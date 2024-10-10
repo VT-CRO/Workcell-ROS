@@ -23,6 +23,14 @@ To run the mainController node
 
     ros2 run mc2425 mainController
 
+To run the pickAndPlace node
+
+    ros2 run mc2425 pickAndPlace
+
 To add a part to the shelf
 
     ros2 run mc2425 addPrint --ros-args -p printer:=<INTEGER> -p height:=<FLOAT> -p name:=<STRING> -p author:=<STRING>
+
+To validate a part is in a shelf slot
+
+    ros2 run mc2425 shelfUpdate --ros-args -p shelf:=<INTEGER>
