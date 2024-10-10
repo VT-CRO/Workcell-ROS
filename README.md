@@ -1,7 +1,7 @@
 # Manufacturing Workcell Backend
 Developed using ROS2
 
-### Requirements
+### Validated on
 - Ubuntu 24.04
 - ROS2 Jazzy
 
