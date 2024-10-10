@@ -34,3 +34,8 @@ To add a part to the shelf
 To validate a part is in a shelf slot
 
     ros2 run mc2425 shelfUpdate --ros-args -p shelf:=<INTEGER>
+
+### TODO
+- Connection to Klipper nodes (Should each printer be its own node or should it just call Klipper commands through API?)
+- Function to determine whether removal or plate movement should occur
+- Removal node implementation
