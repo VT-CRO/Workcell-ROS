@@ -15,8 +15,10 @@ class MainController(Node):
         super().__init__('mainController')
         self.addSubscription = self.create_subscription(AddPart,'addPart',self.addPart_callback,10)
         self.addSubscription  # prevent unused variable warning
-        self.shelfUpdateSub = self.create_subscription(Int32, 'shelfUpdate', self.shelfUpdate_callback, 10)
-        self.shelfUpdateSub  # prevent unused variable warning
+        self.shelfCheckSub = self.create_subscription(Int32, 'shelfCheck', self.shelfCheck_callback, 10)
+        self.shelfCheckSub  # prevent unused variable warning
+        self.removePartSub = self.create_subscription(Int32, 'removePart', self.removePart_callback, 10)
+        self.removePartSub  # prevent unused variable warning
         self.pnpRemoverPub = self.create_publisher(PnPRemoval, 'pnpRemover',10)
         self.shelf = partsShelf(SLOT_NUMBER, HEIGHT)
 
@@ -53,13 +55,23 @@ class MainController(Node):
             self.pnpRemoverPub.publish(pnpRemover_msg)
             self.get_logger().info(f'Publishing: Removal: {pnpRemover_msg.print_removal}, Printer Number: {pnpRemover_msg.print_number}, Slot Number: {pnpRemover_msg.shelf_num}')
 
-    def shelfUpdate_callback(self,msg):
+    def shelfCheck_callback(self,msg):
         shelfNum = msg.data
         self.get_logger().info(f'Received: {shelfNum}')
-        if self.shelf.shelfChecker(shelfNum) is not None:
-            self.get_logger().info("Storage confirmed")
+        part = self.shelf.shelfChecker(shelfNum)
+        if part is not None:
+            self.get_logger().info(f"{part} found at #{shelfNum}")
         else:
-            self.get_logger().info("Misplaced!")
+            self.get_logger().info(f"No part found at #{shelfNum}")
+
+    def removePart_callback(self,msg):
+        shelfNum = msg.data
+        self.get_logger().info(f'Received: {shelfNum}')
+        remove = self.shelf.removePart(shelfNum)
+        if remove:
+            self.get_logger().info(f"Successful remove at #{shelfNum}")
+        else:
+            self.get_logger().info(f"No part found at #{shelfNum}")
 
 
 def main(args=None):

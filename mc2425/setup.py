@@ -22,8 +22,9 @@ setup(
         'console_scripts': [
             'addPrint = mc2425.addPrint:main',
             'mainController = mc2425.mainController:main',
-            'shelfUpdate = mc2425.shelfUpdate:main',
+            'shelfCheck = mc2425.shelfCheck:main',
             'pickAndPlace = mc2425.pickAndPlace:main',
+            'removePart = mc2425.removePart:main'
         ],
     },
 )

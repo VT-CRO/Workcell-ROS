@@ -2,16 +2,16 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int32
 
-class shelfUpdate(Node):
+class shelfCheck(Node):
     def __init__(self):
-        super().__init__('shelfUpdate')
+        super().__init__('shelfCheck')
         # Declare and get the parameter for height
         self.declare_parameter('shelf', 0)
 
         shelfNumber = self.get_parameter('shelf').get_parameter_value().integer_value
 
         # Create publisher
-        self.publisher_ = self.create_publisher(Int32, 'shelfUpdate', 10)
+        self.publisher_ = self.create_publisher(Int32, 'shelfCheck', 10)
 
         # Set up a timer for async behavior, even if we only publish once
         timer_period = 0.5
@@ -30,9 +30,9 @@ class shelfUpdate(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    shelf_update = shelfUpdate()
-    rclpy.spin_once(shelf_update)  # Spin only once, then shutdown ------------------------ spin_once
-    shelf_update.destroy_node()
+    shelf_check = shelfCheck()
+    rclpy.spin_once(shelf_check)  # Spin only once, then shutdown ------------------------ spin_once
+    shelf_check.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':
