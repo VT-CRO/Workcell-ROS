@@ -1,6 +1,9 @@
 # Manufacturing Workcell Backend
 Developed using ROS2
 
+## Network
+![network](https://github.com/VT-CRO/Workcell-Software/blob/main/images/network.jpg)
+
 ### Validated on
 - Ubuntu 24.04
 - ROS2 Jazzy
@@ -18,6 +21,8 @@ Build mc2425 and mc2425_msgs
 Source the install
 
     source install/setup.bash
+
+### Commands
 
 To run the mainController node
 
