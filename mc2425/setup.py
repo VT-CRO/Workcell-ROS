@@ -10,7 +10,7 @@ setup(
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
     ],
-    install_requires=["setuptools"],
+    install_requires=["setuptools","requests"],
     zip_safe=True,
     maintainer="andrew",
     maintainer_email="aviola@vt.edu",
@@ -25,6 +25,7 @@ setup(
             "pickAndPlace = mc2425.pickAndPlace:main",
             "removePart = mc2425.removePart:main",
             "requestGcode = mc2425.requestGcode:main",
+            "printer = mc2425.printer:main",
         ],
     },
 )
