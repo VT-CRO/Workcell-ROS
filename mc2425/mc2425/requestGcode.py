@@ -17,7 +17,7 @@ class RequestGcode(Node):
         self.get_logger().info(f"Receiving file: {request.filename}")
         # Process the file data (e.g., save to disk)
         try:
-            with open(f"{request.filename}.gcode", "w") as file:
+            with open(f"{request.filename}", "w") as file:
                 file.write(request.filedata)
             response.success = True
             response.message = (
