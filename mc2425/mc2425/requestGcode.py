@@ -17,7 +17,7 @@ class RequestGcode(Node):
         self.get_logger().info(f"Receiving file: {request.filename}")
         # Process the file data (e.g., save to disk)
         try:
-            with open(f"{request.filename[:-6]}-output.gcode", "w") as file:
+            with open(f"{request.filename}.gcode", "w") as file:
                 file.write(request.filedata)
             response.success = True
             response.message = (
@@ -27,7 +27,7 @@ class RequestGcode(Node):
             msg = String()
             msg.data = request.filename
             self.publisher.publish(msg)
-            
+
         except Exception as e:
             response.success = False
             response.message = f"Failed to save file: {str(e)}"
