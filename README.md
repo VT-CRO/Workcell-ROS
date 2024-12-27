@@ -32,6 +32,10 @@ To run the mainController node
 
     ros2 run mc2425 mainController
 
+To run the printer node
+
+    ros2 run mc2425 printer
+
 To run the pickAndPlace node
 
     ros2 run mc2425 pickAndPlace
@@ -48,7 +52,7 @@ To validate a part is in a shelf slot
 
     ros2 run mc2425 shelfCheck --ros-args -p shelf:=<INTEGER>
 
-To request a file, ensure that the main controller is runnning
+To request a file, ensure that the main controller and printer nodes are runnning
 
     ros2 run mc2425 requestGcode
 
