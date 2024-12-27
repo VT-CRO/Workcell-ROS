@@ -1,14 +1,18 @@
 # Manufacturing Workcell Backend
+
 Developed using ROS2
 
 ## Network
+
 ![network](https://github.com/VT-CRO/Workcell-Software/blob/main/images/network.jpg)
 
 ### Validated on
+
 - Ubuntu 24.04
 - ROS2 Jazzy
 
 ### Getting Started
+
 Clone the repo
 
     git clone https://github.com/VT-CRO/Workcell-Software.git
@@ -44,7 +48,12 @@ To validate a part is in a shelf slot
 
     ros2 run mc2425 shelfCheck --ros-args -p shelf:=<INTEGER>
 
+To request a file, ensure that the main controller is runnning
+
+    ros2 run mc2425 requestGcode
+
 ### TODO
+
 - Connection to Klipper nodes (Should each printer be its own node or should it just call Klipper commands through API?)
 - Function to determine whether removal or plate movement should occur
 - Removal node implementation

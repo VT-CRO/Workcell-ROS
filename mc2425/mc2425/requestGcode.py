@@ -3,11 +3,11 @@ from rclpy.node import Node
 from mc2425_msgs.srv import FileTransfer  # Replace with your package name
 
 
-class PrinterNode(Node):
+class RequestGcode(Node):
     def __init__(self):
-        super().__init__("printer_node")
+        super().__init__("requestGcode")
         self.service = self.create_service(
-            FileTransfer, "/file_transfer", self.handle_file_transfer
+            FileTransfer, "requestGcode", self.handle_file_transfer
         )
         self.get_logger().info("Printer is ready for file transfer.")
 
@@ -35,19 +35,19 @@ class PrinterNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    printer_node = PrinterNode()
+    Request_Gcode = RequestGcode()
     executor = rclpy.executors.SingleThreadedExecutor()
-    printer_node.executor = (
+    Request_Gcode.executor = (
         executor  # Pass executor to the node for controlled shutdown
     )
-    executor.add_node(printer_node)
+    executor.add_node(Request_Gcode)
 
     try:
         executor.spin()
     except KeyboardInterrupt:
-        printer_node.get_logger().info("PrinterNode interrupted by user.")
+        Request_Gcode.get_logger().info("PrinterNode interrupted by user.")
     finally:
-        printer_node.destroy_node()
+        Request_Gcode.destroy_node()
         rclpy.shutdown()
 
 
