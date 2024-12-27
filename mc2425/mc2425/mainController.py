@@ -3,6 +3,7 @@ from rclpy.node import Node
 from std_msgs.msg import Int32
 from mc2425_msgs.msg import AddPart
 from mc2425_msgs.msg import PnPRemoval
+from mc2425_msgs.srv import FileTransfer
 
 from mc2425.shelf import partsShelf
 from mc2425.gcode import gcode
@@ -20,6 +21,8 @@ class MainController(Node):
         self.removePartSub = self.create_subscription(Int32, 'removePart', self.removePart_callback, 10)
         self.removePartSub  # prevent unused variable warning
         self.pnpRemoverPub = self.create_publisher(PnPRemoval, 'pnpRemover',10)
+        self.client = self.create_client(FileTransfer, '/file_transfer')
+        self.timer = self.create_timer(1.0, self.check_service)
         self.shelf = partsShelf(SLOT_NUMBER, HEIGHT)
 
     def determineRemoval(self):
@@ -41,7 +44,10 @@ class MainController(Node):
             return f"Part added successfully in slot {slot}", slot
         else:
             return "Part not added, skipping...", -1
-
+        
+    # def printReady_callback(self,msg):
+    #     self.get_logger().info(f'Received: {msg.data}')
+    #     self.shelf.printReady(msg.data)
 
     def addPart_callback(self, msg):
         self.get_logger().info(f'Received: {msg.printer_number} {msg.print_height} {msg.part_name} {msg.author}')
@@ -72,6 +78,37 @@ class MainController(Node):
             self.get_logger().info(f"Successful remove at #{shelfNum}")
         else:
             self.get_logger().info(f"No part found at #{shelfNum}")
+    
+    def check_service(self):
+        if self.client.wait_for_service(timeout_sec=0.5):
+            self.get_logger().info("Printer service is available. Sending file...")
+            self.send_file()
+            self.timer.cancel()
+        else:
+            pass
+            #self.get_logger().info("Waiting for printer service...")
+
+    def send_file(self):
+        request = FileTransfer.Request()
+        file_name = "example.gcode"
+        request.filename = "example.gcode"
+        try:
+            with open(file_name, 'r') as file:
+                request.filedata = file.read()
+        except Exception as e:
+            self.get_logger().error(f"Failed to read file: {str(e)}")
+        future = self.client.call_async(request)
+        future.add_done_callback(self.file_transfer_callback)
+
+    def file_transfer_callback(self, future):
+        try:
+            response = future.result()
+            if response.success:
+                self.get_logger().info(f"File transfer successful: {response.message}")
+            else:
+                self.get_logger().info(f"File transfer failed: {response.message}")
+        except Exception as e:
+            self.get_logger().error(f"Service call failed: {str(e)}")
 
 
 def main(args=None):
