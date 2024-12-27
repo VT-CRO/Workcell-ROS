@@ -94,7 +94,6 @@ class MainController(Node):
         if self.client.wait_for_service(timeout_sec=0.5):
             self.get_logger().info("Printer service is available. Sending file...")
             self.send_file()
-            self.timer.cancel()
         else:
             pass
             # self.get_logger().info("Waiting for printer service...")
