@@ -15,8 +15,8 @@ Developed using ROS2
 
 Clone the repo
 
-    git clone https://github.com/VT-CRO/Workcell-Software.git
-    cd Workcell-Software
+    git clone https://github.com/VT-CRO/Workcell-ROS.git
+    cd Workcell-ROS
 
 Build mc2425 and mc2425_msgs
 
