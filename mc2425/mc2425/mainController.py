@@ -16,7 +16,7 @@ class MainController(Node):
     def __init__(self):
         super().__init__("mainController")
         self.addSubscription = self.create_subscription(
-            AddPart, "addPart", self.addPart_callback, 10
+            AddPart, "finishedPrint", self.addPart_callback, 10
         )
         self.addSubscription  # prevent unused variable warning
         self.shelfCheckSub = self.create_subscription(

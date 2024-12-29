@@ -1,3 +1,5 @@
+# DEPRECATED: This node is not used in the system - AV 12/27/24
+
 import rclpy
 from rclpy.node import Node
 from mc2425_msgs.msg import AddPart
