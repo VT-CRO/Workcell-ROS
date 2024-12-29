@@ -26,6 +26,10 @@ Source the install
 
     source install/setup.bash
 
+Copy the klipper2ros.py communication file to the klipper directory
+
+    cp klipper2ros.py $HOME/klipper
+
 ### Commands
 
 To run the mainController node
@@ -34,13 +38,16 @@ To run the mainController node
 
 To run the printer node
 
+    export PRINTER_ID=1 # This is an integer that is unique to a specific printer node
+    # If you want to permanently save the printer ID use the following command:
+    # echo "export PRINTER_ID=1" >> ~/.bashrc
     ros2 run mc2425 printer
 
 To run the pickAndPlace node
 
     ros2 run mc2425 pickAndPlace
 
-To add a part to the shelf
+~~To add a part to the shelf~~ DEPRECATED 
 
     ros2 run mc2425 addPrint --ros-args -p printer:=<INTEGER> -p height:=<FLOAT> -p name:=<STRING> -p author:=<STRING>
 
