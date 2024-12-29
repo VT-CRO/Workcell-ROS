@@ -10,9 +10,9 @@ import os
 class Printer(Node):
     def __init__(self):
         super().__init__("printer")
-        self.printer_number = int(os.getenv("PRINTER_NUMBER", -1))
-        if self.printer_number == -1:
-            self.get_logger().error("Printer number not set")
+        self.printer_ID = int(os.getenv("PRINTER_ID", -1))
+        if self.printer_ID == -1:
+            self.get_logger().error("Printer ID not set")
             return
         self.finishedPrintPub = self.create_publisher(AddPart, "finishedPrint", 10)
         
@@ -20,7 +20,7 @@ class Printer(Node):
             String, "startGcode", self.startGcodeCallback, 10
         )
         self.startGcodeSub  # prevent unused variable warning
-        self.get_logger().info(f"Printer {self.printer_number} initialized")
+        self.get_logger().info(f"Printer {self.printer_ID} initialized")
         self.socket_path = f"/tmp/printer_socket"
         self.socket_handler = UnixSocketHandler(
             socket_path=self.socket_path,
@@ -44,11 +44,11 @@ class Printer(Node):
     def sendFinishedPrint(self, height, name, author):
         msg = AddPart()
         msg.print_height = height
-        msg.printer_number = self.printer_number
+        msg.printer_ID = self.printer_ID
         msg.part_name = name
         msg.author = author
         self.finishedPrintPub.publish(msg)
-        self.get_logger().info(f"Printer {self.printer_number} published: {msg}")
+        self.get_logger().info(f"Printer {self.printer_ID} published: {msg}")
     
     def startGcodeCallback(self, msg):
         with open(msg.data, "rb") as gcode:
@@ -61,7 +61,7 @@ class Printer(Node):
 def main(args=None):
     rclpy.init(args=args)
     printer = Printer()
-    if printer.printer_number == -1:
+    if printer.printer_ID == -1:
         return -1
     rclpy.spin(printer)
     printer.destroy_node()
