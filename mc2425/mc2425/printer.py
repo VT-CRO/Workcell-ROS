@@ -19,11 +19,6 @@ class Printer(Node):
             return
         self.finishedPrintPub = self.create_publisher(AddPart, "finishedPrint", 10)
 
-        self.startGcodeSub = self.create_subscription(
-            String, "startGcode", self.startGcodeCallback, 10
-        )
-        self.startGcodeSub  # prevent unused variable warning
-
         self.request_gcode_client = self.create_client(FileTransfer, "requestGcode")
         while not self.request_gcode_client.wait_for_service(timeout_sec=5.0):
             self.get_logger().info("Waiting for MainController service...")
