@@ -8,20 +8,37 @@ Written by Andrew Viola
 
 
 import math
+import os
+import json
 from mc2425.gcode import gcode
 
 class partsShelf:
-    def __init__(self,slotNumber: int,height: float):
+    def __init__(self,slotNumber: int,height: float, database: str = "shelf.json"):
         """
 
         :param slotNumber: Amount of slots the shelving unit has
         :param height: Total amount of height in mm
         """
-        self.slotNumber = slotNumber
-        self.height = height
-        self.slots = [None]*self.slotNumber
-        self.slotSize = self.height/self.slotNumber
-        self.parts = {}
+        self.database = database
+        needNewDatabase = True
+        if os.path.exists(database):
+            with open(database, "r") as f:
+                data = json.load(f)
+            if data["slotNumber"] == slotNumber and data["height"] == height:
+                self.slotNumber = data["slotNumber"]
+                self.height = data["height"]
+                self.slotSize = data["slotSize"]
+                self.slots = data["slots"]
+                self.parts = data["parts"]
+                needNewDatabase = False
+        if needNewDatabase:
+            self.slotNumber = slotNumber
+            self.height = height
+            self.slots = [None]*self.slotNumber
+            self.slotSize = self.height/self.slotNumber
+            self.parts = {}
+            with open(database, "w") as f:
+                json.dump({"slotNumber":self.slotNumber, "height":self.height, "slotSize":self.slotSize, "slots":self.slots, "parts":self.parts},f)
 
     def __str__(self):
         """
@@ -86,6 +103,7 @@ class partsShelf:
         if count == 0:
             return False,None
         else:
+            self._save()
             return True,self.parts[name]["Start"]
 
     def removePart(self, start: int):
@@ -99,8 +117,21 @@ class partsShelf:
                for slot in range(start, self.parts[key]["End"]+1):
                    self.slots[slot] = None
                self.parts.pop(key)
+               self._save()
                return True
        return False
+   
+    def clearShelf(self):
+        """
+        Clears the shelf and resets the parts list
+        """
+        self.slots = [None]*self.slotNumber
+        self.parts = {}
+        self._save()
 
     def shelfChecker(self, shelfNum: int):
         return self.slots[shelfNum]
+    
+    def _save(self):
+        with open(self.database, "w") as f:
+                json.dump({"slotNumber":self.slotNumber, "height":self.height, "slotSize":self.slotSize, "slots":self.slots, "parts":self.parts},f)

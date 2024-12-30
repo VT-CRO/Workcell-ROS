@@ -1,5 +1,6 @@
 string filename
-string filedata
 ---
 bool success
 string message
+string filename
+string filedata

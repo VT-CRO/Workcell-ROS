@@ -2,3 +2,5 @@
 build/
 install/
 log/
+mc2425/__pycache__/gcode.cpython-312.pyc
+mc2425/__pycache__/shelf.cpython-312.pyc
