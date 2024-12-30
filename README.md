@@ -32,7 +32,7 @@ Copy the klipper2ros.py communication file to the klipper directory
 
 Install the requirements
 
-    pip install -r requirements.txt
+    pip install -r requirements.txt --break-system-packages
 
 ### Commands
 
