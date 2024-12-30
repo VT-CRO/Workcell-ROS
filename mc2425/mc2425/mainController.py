@@ -35,6 +35,7 @@ class MainController(Node):
         )
         self.clearShelfSub  # prevent unused variable warning
         self.pnpRemoverPub = self.create_publisher(PnPRemoval, "pnpRemover", 10)
+        self.addPartFail = self.create_publisher(AddPart, "addPartFail", 10)
 
         self.requestGcodeService = self.create_service(
             FileTransfer, "requestGcode", self.handle_gcode_request
@@ -104,6 +105,9 @@ class MainController(Node):
             self.get_logger().info(
                 f"Publishing: Removal: {pnpRemover_msg.print_removal}, Printer Number: {pnpRemover_msg.print_id}, Slot Number: {pnpRemover_msg.shelf_num}"
             )
+        else:
+            self.addPartFail.publish(msg)
+            self.get_logger().info("Publishing: Part not added")
 
     def clearShelf_callback(self, msg):
         self.get_logger().info(f"Received: {msg.data}")

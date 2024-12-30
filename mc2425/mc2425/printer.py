@@ -24,9 +24,16 @@ class Printer(Node):
         )
         self.newPrintSub
 
+        self.addFailSub = self.create_subscription(
+            AddPart, "addPartFail", self.addFail, 10
+        )
+        self.addFailSub
+
         self.request_gcode_client = self.create_client(FileTransfer, "requestGcode")
         while not self.request_gcode_client.wait_for_service(timeout_sec=5.0):
             self.get_logger().info("Waiting for MainController service...")
+            
+        self.checkAvailability = None
 
         self.get_logger().info(f"Printer {self.printer_ID} initialized")
         self.socket_path = f"/tmp/printer_socket"
@@ -56,6 +63,9 @@ class Printer(Node):
             self.get_logger().error("Invalid message format")
 
     def sendFinishedPrint(self, height, name, author):
+        if self.checkAvailability is not None:
+            self.checkAvailability.cancel()
+            self.checkAvailability = None
         msg = AddPart()
         msg.print_height = height
         msg.printer_id = self.printer_ID
@@ -63,6 +73,15 @@ class Printer(Node):
         msg.author = author
         self.finishedPrintPub.publish(msg)
         self.get_logger().info(f"Printer {self.printer_ID} published: {msg}")
+
+    def addFail(self, msg):
+        if msg.printer_id == self.printer_ID:
+            self.get_logger().info(
+                f"Received addPartFail for printer {self.printer_ID}"
+            )
+            self.checkAvailability = self.create_timer(60,lambda: self.sendFinishedPrint(msg.print_height, msg.part_name, msg.author))
+        else:
+            self.get_logger().info(f"Ignoring print request for printer {msg.data}")
 
     def startGcode(self, filename):
         with open(filename, "rb") as gcode:

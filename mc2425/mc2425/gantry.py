@@ -34,9 +34,9 @@ class gantry(Node):
             # TODO: Implement removal task
         else:
             self.get_logger().info(
-                f"Moving plate on printer {msg.print_id} to shelf #{msg.print_id}"
+                f"Moving plate on printer {msg.print_id} to shelf #{msg.shelf_num}"
             )
-            data = {"script": f"MOVE_PLATE PRINTER_NUMBER={msg.print_id} SHELF_NUMBER={msg.print_id}"}
+            data = {"script": f"MOVE_PLATE PRINTER_NUMBER={msg.print_id} SHELF_NUMBER={msg.shelf_num}"}
             requests.post("http://localhost/printer/gcode/script", json=data)
             
     def ensureReady(self, print_id, shelf_num):
