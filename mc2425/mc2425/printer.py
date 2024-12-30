@@ -20,7 +20,7 @@ class Printer(Node):
         self.finishedPrintPub = self.create_publisher(AddPart, "finishedPrint", 10)
 
         self.newPrintSub = self.create_subscription(
-            Int32, "initiateReady", self.newPrint(), 10
+            Int32, "initiateReady", self.newPrint, 10
         )
         self.newPrintSub
 
