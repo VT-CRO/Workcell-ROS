@@ -30,6 +30,10 @@ Copy the klipper2ros.py communication file to the klipper directory
 
     cp klipper2ros.py $HOME/klipper
 
+Install the requirements
+
+    pip install -r requirements.txt
+
 ### Commands
 
 To run the mainController node
