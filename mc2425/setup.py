@@ -10,7 +10,7 @@ setup(
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
     ],
-    install_requires=["setuptools", "requests"],
+    install_requires=["setuptools", "requests", "pynput"],
     zip_safe=True,
     maintainer="andrew",
     maintainer_email="aviola@vt.edu",
@@ -27,6 +27,7 @@ setup(
             "requestGcode = mc2425.requestGcode:main",
             "printer = mc2425.printer:main",
             "clearShelf = mc2425.clearShelf:main",
+            "shelf = mc2425.shelf:main",
         ],
     },
 )

@@ -7,7 +7,7 @@ from mc2425_msgs.msg import PnPRemoval
 from mc2425_msgs.srv import FileTransfer
 from std_msgs.msg import String
 
-from mc2425.shelf import partsShelf
+from mc2425.mc2425.shelfClass import partsShelf
 from mc2425.gcode import gcode
 
 SLOT_NUMBER = 24
