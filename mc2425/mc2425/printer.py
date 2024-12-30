@@ -1,7 +1,7 @@
 import rclpy
 import requests
 from rclpy.node import Node
-from std_msgs.msg import String
+from std_msgs.msg import Int32
 from mc2425_msgs.srv import FileTransfer
 from mc2425_msgs.msg import AddPart
 from mc2425.unixSocketHandler import UnixSocketHandler
@@ -18,6 +18,11 @@ class Printer(Node):
             self.get_logger().error("Printer ID not set")
             return
         self.finishedPrintPub = self.create_publisher(AddPart, "finishedPrint", 10)
+
+        self.newPrintSub = self.create_subscription(
+            Int32, "initiateReady", self.newPrint(), 10
+        )
+        self.newPrintSub
 
         self.request_gcode_client = self.create_client(FileTransfer, "requestGcode")
         while not self.request_gcode_client.wait_for_service(timeout_sec=5.0):
@@ -65,6 +70,15 @@ class Printer(Node):
             r = requests.post("http://localhost/server/files/upload", files=pload)
             self._logger.info(f"File {filename} sent to printer. Response: {r.text}")
         os.remove(filename)
+
+    def newPrint(self, msg):
+        if msg.data == self.printer_ID:
+            self.get_logger().info(
+                f"Received new print request for printer {self.printer_ID}"
+            )
+            self.requestGcode("")
+        else:
+            self.get_logger().info(f"Ignoring print request for printer {msg.data}")
 
     def requestGcode(self, filename):
         """
