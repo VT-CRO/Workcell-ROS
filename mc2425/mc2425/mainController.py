@@ -7,7 +7,7 @@ from mc2425_msgs.msg import PnPRemoval
 from mc2425_msgs.srv import FileTransfer
 from std_msgs.msg import String
 
-from mc2425.mc2425.shelfClass import partsShelf
+from mc2425.shelfClass import partsShelf
 from mc2425.gcode import gcode
 
 SLOT_NUMBER = 24
@@ -42,6 +42,7 @@ class MainController(Node):
         )
 
         self.shelf = partsShelf(SLOT_NUMBER, HEIGHT)
+        self.get_logger().info(f"Main Controller initialized")
 
     def determineRemoval(self):
         """
