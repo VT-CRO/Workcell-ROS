@@ -1,10 +1,10 @@
 import requests
 import os
-from mc2425.variables import BACKEND_URL, BOT_UUID, QUEUE_SAVE
+from mc2425.variables import FRONTEND_URL, BOT_UUID, QUEUE_SAVE
 
 def download_gcode():
     # Construct the URL for the bot-specific route
-    url = f"{BACKEND_URL}/{BOT_UUID}/requestgcode"
+    url = f"{FRONTEND_URL}/api/{BOT_UUID}/requestgcode"
     
     if not os.path.exists(QUEUE_SAVE):
         os.makedirs(QUEUE_SAVE)
