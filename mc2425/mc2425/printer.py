@@ -116,6 +116,9 @@ class Printer(Node):
         """
         Handle the response from MainController.
         """
+        if not os.path.exists(SAVE_PATH):
+            os.makedirs(SAVE_PATH)
+        
         try:
             response = future.result()
             if response.success:
