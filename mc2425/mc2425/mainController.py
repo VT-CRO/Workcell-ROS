@@ -1,6 +1,7 @@
 import rclpy
 import os
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, HistoryPolicy
 from std_msgs.msg import Int32
 from mc2425_msgs.msg import AddPart
 from mc2425_msgs.msg import PnPRemoval
@@ -17,6 +18,11 @@ from mc2425.queueGcode import download_gcode
 class MainController(Node):
     def __init__(self):
         super().__init__("mainController")
+        qos_profile = QoSProfile(
+            history=HistoryPolicy.KEEP_LAST,
+            depth=10,
+            reliability=1,
+        )
         self.addSubscription = self.create_subscription(
             AddPart, "finishedPrint", self.addPart_callback, 10
         )
@@ -33,7 +39,7 @@ class MainController(Node):
             String, "clearShelf", self.clearShelf_callback, 10
         )
         self.clearShelfSub  # prevent unused variable warning
-        self.pnpRemoverPub = self.create_publisher(PnPRemoval, "pnpRemover", 10)
+        self.pnpRemoverPub = self.create_publisher(PnPRemoval, "pnpRemover", qos_profile)
         self.addPartFail = self.create_publisher(AddPart, "addPartFail", 10)
 
         self.requestGcodeService = self.create_service(
@@ -108,6 +114,8 @@ class MainController(Node):
             pnpRemover_msg.print_removal = self.determineRemoval()
             pnpRemover_msg.print_id = msg.printer_id
             pnpRemover_msg.shelf_num = slot
+            pnpRemover_msg.author=msg.author
+            pnpRemover_msg.part_name=msg.part_name
             self.pnpRemoverPub.publish(pnpRemover_msg)
             self.get_logger().info(
                 f"Publishing: Removal: {pnpRemover_msg.print_removal}, Printer Number: {pnpRemover_msg.print_id}, Slot Number: {pnpRemover_msg.shelf_num}"

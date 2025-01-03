@@ -1,16 +1,25 @@
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, HistoryPolicy
 from std_msgs.msg import Int32
 from mc2425_msgs.msg import PnPRemoval
 from mc2425.unixSocketHandler import UnixSocketHandler
+from mc2425.discordNotification import send_notification
 import requests
 
 
 class gantry(Node):
     def __init__(self):
         super().__init__("gantry")
+        
+        qos_profile = QoSProfile(
+            history=HistoryPolicy.KEEP_LAST,  # Keep the last N messages
+            depth=10,                        # Number of messages in the queue
+            reliability=1,                   # Reliable delivery
+        )
+        
         self.pnpSub = self.create_subscription(
-            PnPRemoval, "pnpRemover", self.pnp_callback, 10
+            PnPRemoval, "pnpRemover", self.pnp_callback, qos_profile
         )
         self.pnpSub  # prevent unused variable warning
         
@@ -27,7 +36,7 @@ class gantry(Node):
 
     def pnp_callback(self, msg):
         self.get_logger().info(
-            f"Received: {msg.print_removal} {msg.print_id} {msg.shelf_num}"
+            f"Received: {msg.print_removal} {msg.print_id} {msg.shelf_num} {msg.part_name} {msg.author}"
         )
         if msg.print_removal:
             self.get_logger().info("Sending to the removal machine...")
@@ -36,7 +45,7 @@ class gantry(Node):
             self.get_logger().info(
                 f"Moving plate on printer {msg.print_id} to shelf #{msg.shelf_num}"
             )
-            data = {"script": f"MOVE_PLATE PRINTER_NUMBER={msg.print_id} SHELF_NUMBER={msg.shelf_num}"}
+            data = {"script": f"MOVE_PLATE PRINTER_NUMBER={msg.print_id} SHELF_NUMBER={msg.shelf_num} NAME={msg.part_name} AUTHOR={msg.author}"}
             requests.post("http://localhost/printer/gcode/script", json=data)
             
     def ensureReady(self, print_id, shelf_num):
@@ -52,7 +61,8 @@ class gantry(Node):
         try:
             items = message.split(",")
             if items[0] == "MOVE_COMPLETE":
-                _, print_id, shelf_num = items
+                _, print_id, shelf_num, name, author = items
+                send_notification(f"<@{author}> Part: {name} is ready for pickup on shelf #{shelf_num}")
                 if self.ensureReady(print_id, shelf_num):
                     msg = Int32()
                     msg.data = int(print_id)
