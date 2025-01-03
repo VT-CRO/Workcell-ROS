@@ -6,13 +6,12 @@ from mc2425_msgs.msg import AddPart
 from mc2425_msgs.msg import PnPRemoval
 from mc2425_msgs.srv import FileTransfer
 from std_msgs.msg import String
+from mc2425.variables import GCODE_PATH, SLOT_NUMBER, HEIGHT
+
 
 from mc2425.shelfClass import partsShelf
 from mc2425.gcode import gcode
-
-SLOT_NUMBER = 24
-HEIGHT = 1200
-GCODE_PATH = ""
+from mc2425.queueGcode import download_gcode
 
 
 class MainController(Node):
@@ -68,7 +67,13 @@ class MainController(Node):
         """
         Handles G-code file transfer requests.
         """
-        filename = "example.gcode"
+        filename = download_gcode()
+        if filename == -1:
+            response.success = False
+            response.message = "No files available for download."
+            self.get_logger().info(response.message)
+            return response
+        
         response.filename = filename
         self.get_logger().info(f"Received file request for: {filename}")
 
@@ -80,6 +85,7 @@ class MainController(Node):
             response.success = True
             response.message = f"File {filename} successfully transferred."
             self.get_logger().info(response.message)
+            os.remove(gcode_path)
         except FileNotFoundError:
             response.success = False
             response.message = f"File {filename} not found."

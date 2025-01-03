@@ -5,9 +5,8 @@ from std_msgs.msg import Int32
 from mc2425_msgs.srv import FileTransfer
 from mc2425_msgs.msg import AddPart
 from mc2425.unixSocketHandler import UnixSocketHandler
+from mc2425.variables import SAVE_PATH
 import os
-
-SAVE_PATH = ""
 
 
 class Printer(Node):
@@ -34,6 +33,7 @@ class Printer(Node):
             self.get_logger().info("Waiting for MainController service...")
             
         self.checkAvailability = None
+        self.checkForNewGcode = None
 
         self.get_logger().info(f"Printer {self.printer_ID} initialized")
         self.socket_path = f"/tmp/printer_socket"
@@ -103,6 +103,9 @@ class Printer(Node):
         """
         Request a G-code file from MainController.
         """
+        if self.checkForNewGcode is not None:
+            self.checkForNewGcode.cancel()
+            self.checkForNewGcode = None
         request = FileTransfer.Request()
         request.filename = filename
         self.get_logger().info(f"Requesting G-code file: {filename}")
@@ -118,13 +121,14 @@ class Printer(Node):
             if response.success:
                 self.get_logger().info(f"G-code received: {response.filename}")
                 # Save the file locally
-                file_path = os.path.join(SAVE_PATH, f"test-{response.filename}")
+                file_path = os.path.join(SAVE_PATH, f"{response.filename}")
                 with open(file_path, "w") as file:
                     file.write(response.filedata)
                 self.get_logger().info(f"G-code file saved to: {file_path}")
                 self.startGcode(file_path)
             else:
-                self.get_logger().error(f"Failed to get G-code: {response.filename}")
+                self.get_logger().info(f"No files available for download, checking in 60 seconds")
+                self.checkForNewGcode = self.create_timer(60, lambda: self.requestGcode(""))
         except Exception as e:
             self.get_logger().error(f"Service call failed: {str(e)}")
 
