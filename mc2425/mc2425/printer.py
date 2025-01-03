@@ -87,7 +87,7 @@ class Printer(Node):
         with open(filename, "rb") as gcode:
             pload = {"file": gcode, "print": "true"}
             r = requests.post("http://localhost/server/files/upload", files=pload)
-            self._logger.info(f"File {filename} sent to printer. Response: {r.text}")
+            self._logger.info(f"File {filename} sent to printer")
         os.remove(filename)
 
     def newPrint(self, msg):

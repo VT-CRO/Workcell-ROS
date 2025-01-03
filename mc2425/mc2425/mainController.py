@@ -41,6 +41,8 @@ class MainController(Node):
             FileTransfer, "requestGcode", self.handle_gcode_request
         )
 
+        self.printerParts = []
+
         self.shelf = partsShelf(SLOT_NUMBER, HEIGHT)
         self.get_logger().info(f"Main Controller initialized")
 
@@ -74,7 +76,7 @@ class MainController(Node):
             response.message = "No files available for download."
             self.get_logger().info(response.message)
             return response
-        
+
         response.filename = filename
         self.get_logger().info(f"Received file request for: {filename}")
 
@@ -109,17 +111,26 @@ class MainController(Node):
             pnpRemover_msg.print_removal = self.determineRemoval()
             pnpRemover_msg.print_id = msg.printer_id
             pnpRemover_msg.shelf_num = slot
-            pnpRemover_msg.author=msg.author
-            pnpRemover_msg.part_name=msg.part_name
             self.pnpRemoverPub.publish(pnpRemover_msg)
             self.get_logger().info(
                 f"Publishing: Removal: {pnpRemover_msg.print_removal}, Printer Number: {pnpRemover_msg.print_id}, Slot Number: {pnpRemover_msg.shelf_num}"
             )
-            send_notification(f"<@{msg.author}> Part: {msg.part_name} is ready for pick up in slot: {slot}")
+            send_notification(
+                f"<@{msg.author}> Part: **{msg.part_name}** is ready for pick up in slot: **{slot}**"
+            )
+            try:
+                self.printerParts.remove(msg.part_name)
+            except ValueError:
+                self.get_logger().info("Part not found in printerParts, ignoring...")
+                
         else:
             self.addPartFail.publish(msg)
             self.get_logger().info("Publishing: Part not added")
-            send_notification(f"<@{msg.author}> Shelf is full, part: {msg.part_name} is available for pick up on printer: {msg.printer_id}")
+            if msg.part_name not in self.printerParts:
+                send_notification(
+                    f"<@{msg.author}> Shelf is full, part: **{msg.part_name}** is available for pick up on printer: **{msg.printer_id}**"
+                )
+                self.printerParts.append(msg.part_name)
 
     def clearShelf_callback(self, msg):
         self.get_logger().info(f"Received: {msg.data}")
