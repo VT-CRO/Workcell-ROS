@@ -1,7 +1,6 @@
 import rclpy
 import os
 from rclpy.node import Node
-from rclpy.qos import QoSProfile, HistoryPolicy
 from std_msgs.msg import Int32
 from mc2425_msgs.msg import AddPart
 from mc2425_msgs.msg import PnPRemoval
@@ -13,16 +12,12 @@ from mc2425.variables import GCODE_PATH, SLOT_NUMBER, HEIGHT
 from mc2425.shelfClass import partsShelf
 from mc2425.gcode import gcode
 from mc2425.queueGcode import download_gcode
+from mc2425.discordNotification import send_notification
 
 
 class MainController(Node):
     def __init__(self):
         super().__init__("mainController")
-        qos_profile = QoSProfile(
-            history=HistoryPolicy.KEEP_LAST,
-            depth=10,
-            reliability=1,
-        )
         self.addSubscription = self.create_subscription(
             AddPart, "finishedPrint", self.addPart_callback, 10
         )
@@ -39,7 +34,7 @@ class MainController(Node):
             String, "clearShelf", self.clearShelf_callback, 10
         )
         self.clearShelfSub  # prevent unused variable warning
-        self.pnpRemoverPub = self.create_publisher(PnPRemoval, "pnpRemover", qos_profile)
+        self.pnpRemoverPub = self.create_publisher(PnPRemoval, "pnpRemover", 10)
         self.addPartFail = self.create_publisher(AddPart, "addPartFail", 10)
 
         self.requestGcodeService = self.create_service(
@@ -120,9 +115,11 @@ class MainController(Node):
             self.get_logger().info(
                 f"Publishing: Removal: {pnpRemover_msg.print_removal}, Printer Number: {pnpRemover_msg.print_id}, Slot Number: {pnpRemover_msg.shelf_num}"
             )
+            send_notification(f"<@{msg.author}> Part: {msg.part_name} is ready for pick up in slot: {slot}")
         else:
             self.addPartFail.publish(msg)
             self.get_logger().info("Publishing: Part not added")
+            send_notification(f"<@{msg.author}> Shelf is full, part: {msg.part_name} is available for pick up on printer: {msg.printer_id}")
 
     def clearShelf_callback(self, msg):
         self.get_logger().info(f"Received: {msg.data}")
