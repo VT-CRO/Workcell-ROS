@@ -21,9 +21,9 @@ def download_gcode():
             if "filename=" in content_disposition:
                 filename = content_disposition.split("filename=")[1].strip().strip('"')
 
-            filename = os.path.join(QUEUE_SAVE, filename)
+            savepath = os.path.join(QUEUE_SAVE, filename)
             # Write the file in chunks to avoid memory issues with large files
-            with open(filename, "wb") as file:
+            with open(savepath, "wb") as file:
                 for chunk in response.iter_content(chunk_size=8192):
                     file.write(chunk)
             print(f"File downloaded successfully and saved as '{filename}'")
