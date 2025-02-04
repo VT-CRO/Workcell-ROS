@@ -1,15 +1,12 @@
 import requests
 import argparse
-from mc2425.variables import BACKEND_URL, DISCORD_NOTIFY_PATH, FRONTEND_URL, BOT_UUID
+from mc2425.variables import DISCORD_NOTIFY_PATH, FRONTEND_URL, BOT_UUID
 
 def send_notification(message):
     """
     Sends a notification to the backend server to @mention a Discord user and type a number.
 
-    :param server_url: The base URL of the backend server (e.g., "http://localhost:3000")
-    :param discord_id: The Discord user ID to mention
-    :param number: The number to include in the message
-    :param channel_id: The Discord channel ID to send the message in
+    :message: The message to send to the channel
     """
     endpoint = f"{FRONTEND_URL}/api/{BOT_UUID}/{DISCORD_NOTIFY_PATH}"
     print(endpoint)

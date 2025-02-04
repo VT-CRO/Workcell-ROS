@@ -2,6 +2,7 @@ import rclpy
 import requests
 from rclpy.node import Node
 from std_msgs.msg import Int32
+from std_srvs.srv import SetBool
 from mc2425_msgs.srv import FileTransfer
 from mc2425_msgs.msg import AddPart
 from mc2425.unixSocketHandler import UnixSocketHandler
@@ -32,6 +33,8 @@ class Printer(Node):
         while not self.request_gcode_client.wait_for_service(timeout_sec=5.0):
             self.get_logger().info("Waiting for MainController service...")
             
+        self.checkOnline_client = self.create_client(SetBool, "checkOnline")
+            
         self.checkAvailability = None
         self.checkForNewGcode = None
 
@@ -57,10 +60,35 @@ class Printer(Node):
                 self.sendFinishedPrint(float(height), name, author)
             elif items[0] == "GCODE":
                 self.requestGcode("")
+            elif items[0] == "ONLINE":
+                self.checkOnline()
             else:
                 self.get_logger().error("Invalid message format")
         except ValueError:
             self.get_logger().error("Invalid message format")
+            
+    def checkOnline(self):
+        """
+        Request the online status from the service.
+        """
+        if not self.checkOnline_client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().error("Service not available!")
+            return
+
+        request = SetBool.Request()
+        request.data = True  # or False, depending on what you want to check
+
+        future = self.checkOnline_client.call_async(request)
+        rclpy.spin_until_future_complete(self, future)
+
+        if future.result() is not None:
+            online = future.result().success  # Assuming the service returns a success field
+            if online:
+                self.get_logger().info("Queue is online")
+            else:
+                self.get_logger().info("Queue is offline")
+        else:
+            self.get_logger().error("Service call failed!")
 
     def sendFinishedPrint(self, height, name, author):
         if self.checkAvailability is not None:
