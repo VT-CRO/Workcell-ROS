@@ -44,7 +44,7 @@ def download_gcode():
         return -1
     
 def checkStatus():
-    url = f"{FRONTEND_URL}/api/{BOT_UUID}/check"
+    url = f"{FRONTEND_URL}/api/check"
     response = requests.get(url, stream=True)
     if response.status_code == 200:
         return True

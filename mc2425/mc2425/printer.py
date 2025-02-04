@@ -60,7 +60,7 @@ class Printer(Node):
                 self.sendFinishedPrint(float(height), name, author)
             elif items[0] == "GCODE":
                 self.requestGcode("")
-            elif items[0] == "ONLINE":
+            elif items[0] == "STATUS":
                 self.checkOnline()
             else:
                 self.get_logger().error("Invalid message format")
