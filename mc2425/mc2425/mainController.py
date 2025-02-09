@@ -6,12 +6,13 @@ from mc2425_msgs.msg import AddPart
 from mc2425_msgs.msg import PnPRemoval
 from mc2425_msgs.srv import FileTransfer
 from std_msgs.msg import String
+from std_srvs.srv import SetBool
 from mc2425.variables import GCODE_PATH, SLOT_NUMBER, HEIGHT
 
 
 from mc2425.shelfClass import partsShelf
 from mc2425.gcode import gcode
-from mc2425.queueGcode import download_gcode
+from mc2425.queueInteraction import download_gcode, checkStatus
 from mc2425.discordNotification import send_notification
 
 
@@ -40,6 +41,8 @@ class MainController(Node):
         self.requestGcodeService = self.create_service(
             FileTransfer, "requestGcode", self.handle_gcode_request
         )
+        
+        self.onlineService = self.create_service(SetBool, "checkOnline", self.check_online_callback)
 
         self.printerParts = []
 
@@ -131,6 +134,14 @@ class MainController(Node):
                     f"<@{msg.author}> Shelf is full, part: **{msg.part_name}** is available for pick up on printer: **{msg.printer_id}**"
                 )
                 self.printerParts.append(msg.part_name)
+                
+    def check_online_callback(self, request, response):
+        queue_is_online = checkStatus()  # Replace with actual logic
+
+        response.success = queue_is_online
+        response.message = "Queue is online" if queue_is_online else "Queue is offline"
+        self.get_logger().info(response.message)
+        return response
 
     def clearShelf_callback(self, msg):
         self.get_logger().info(f"Received: {msg.data}")

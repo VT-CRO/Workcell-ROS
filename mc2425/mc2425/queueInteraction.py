@@ -42,6 +42,14 @@ def download_gcode():
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
         return -1
+    
+def checkStatus():
+    url = f"{FRONTEND_URL}/api/check"
+    response = requests.get(url, stream=True)
+    if response.status_code == 200:
+        return True
+    else:
+        return False
 
 if __name__ == "__main__":
     download_gcode()
