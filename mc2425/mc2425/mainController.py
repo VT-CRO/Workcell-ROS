@@ -124,7 +124,7 @@ class MainController(Node):
         self.get_logger().info(message)
         if slot != -1:
             pnpRemover_msg = PnPRemoval()
-            pnpRemover_msg.print_removal = self.determineRemoval(msg.print_height, msg.material, msg.density, false)
+            pnpRemover_msg.print_removal = self.determineRemoval(msg.print_height, msg.material, msg.density, False)
             pnpRemover_msg.print_id = msg.printer_id
             pnpRemover_msg.shelf_num = slot
             self.pnpRemoverPub.publish(pnpRemover_msg)
