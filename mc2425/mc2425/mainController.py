@@ -63,7 +63,7 @@ class MainController(Node):
         if(material == 'tpu'):
             return False
 
-        if(min_height > height and min_density > density):
+        if(min_height > height or min_density > density):
             return False
         else:
             return True
