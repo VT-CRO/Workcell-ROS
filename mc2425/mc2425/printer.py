@@ -56,8 +56,8 @@ class Printer(Node):
         try:
             items = message.split(",")
             if items[0] == "END":
-                command, height, name, author = items
-                self.sendFinishedPrint(float(height), name, author)
+                command, density, material, height, name, author = items
+                self.sendFinishedPrint(float(density), material, float(height), name, author)
             elif items[0] == "GCODE":
                 self.requestGcode("")
             elif items[0] == "STATUS":
