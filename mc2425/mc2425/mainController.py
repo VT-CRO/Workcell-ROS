@@ -118,13 +118,13 @@ class MainController(Node):
 
     def addPart_callback(self, msg):
         self.get_logger().info(
-            f"Received: {msg.printer_id} {msg.print_height} {msg.part_name} {msg.author}"
+            f"Received: {msg.printer_id} {msg.print_height} {msg.part_name} {msg.author} {msg.material} {msg.density}"
         )
         message, slot = self.addPart(msg.part_name, msg.author, msg.print_height)
         self.get_logger().info(message)
         if slot != -1:
             pnpRemover_msg = PnPRemoval()
-            pnpRemover_msg.print_removal = self.determineRemoval()
+            pnpRemover_msg.print_removal = self.determineRemoval(msg.print_height, msg.material, msg.density, false)
             pnpRemover_msg.print_id = msg.printer_id
             pnpRemover_msg.shelf_num = slot
             self.pnpRemoverPub.publish(pnpRemover_msg)
