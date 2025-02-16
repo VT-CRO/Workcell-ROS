@@ -49,12 +49,25 @@ class MainController(Node):
         self.shelf = partsShelf(SLOT_NUMBER, HEIGHT)
         self.get_logger().info(f"Main Controller initialized")
 
-    def determineRemoval(self):
+    def determineRemoval(self, height, material, density, override):
+
         """
         TODO
-        :return: Boolean on whether it should be removed from plate
+        multi_part
         """
-        return False
+
+        min_height = 100
+        min_density = 5
+        if(override):    
+            return False
+        if(material == 'tpu'):
+            return False
+
+        if(min_height > height and min_density > density)
+            return False
+        else:
+            return True
+        
 
     def addPart(self, name, author, height):
         """
