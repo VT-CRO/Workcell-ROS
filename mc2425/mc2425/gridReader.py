@@ -21,13 +21,11 @@ def read_grid(serial_connection):
     while True:
         # Read a line from the serial connection
         line = serial_connection.readline().decode('utf-8').strip()
-        print(f"Line received: {line}")  # Debug: Print every line received
 
         # Check if the line contains the grid data
         if line.startswith("[") and line.endswith("]"):
             # This is the grid data
             grid_data = line
-            print(f"Grid data found: {grid_data}")  # Debug: Print the grid data
 
         # Check if the line is the "Shelf Status List:" prefix
         elif line == "Shelf Status List:":
