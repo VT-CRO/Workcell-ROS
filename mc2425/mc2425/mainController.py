@@ -119,7 +119,7 @@ class MainController(Node):
         if not removal:
             message, slot = self.addPart(msg.part_name, msg.author, msg.print_height)
         else:
-            
+            message, slot = -1,-1
         self.get_logger().info(message)
         if slot != -1:
             pnpRemover_msg = PnPRemoval()
