@@ -18,6 +18,7 @@ def read_grid(serial_connection):
     while True:
         # Read a line from the serial connection
         line = serial_connection.readline().decode('utf-8').strip()
+        print(f"Line received: {line}")  # Debug: Print every line received
         
         # Look for the "Shelf Status List:" prefix
         if line.startswith("Shelf Status List:"):
@@ -26,6 +27,7 @@ def read_grid(serial_connection):
             print(f"Raw data received: {list_str}")  # Debug: Print the raw data
             try:
                 # Use ast.literal_eval for safer parsing
+                import ast
                 grid = ast.literal_eval(list_str)
                 
                 # Validate the grid
@@ -35,6 +37,7 @@ def read_grid(serial_connection):
                     raise ValueError("Invalid grid data received.")
             except (SyntaxError, ValueError) as e:
                 raise ValueError(f"Error parsing grid data: {e}")
+
 
 def shelf_status(index):
     """
