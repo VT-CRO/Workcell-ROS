@@ -54,6 +54,7 @@ class MainController(Node):
         """
         TODO
         multi_part
+        distance from sides
         """
 
         min_height = 100
@@ -120,11 +121,15 @@ class MainController(Node):
         self.get_logger().info(
             f"Received: {msg.printer_id} {msg.print_height} {msg.part_name} {msg.author} {msg.material} {msg.density}"
         )
-        message, slot = self.addPart(msg.part_name, msg.author, msg.print_height)
+        removal = self.determineRemoval(msg.print_height, msg.material, msg.density, False)
+        if not removal:
+            message, slot = self.addPart(msg.part_name, msg.author, msg.print_height)
+        else:
+            
         self.get_logger().info(message)
         if slot != -1:
             pnpRemover_msg = PnPRemoval()
-            pnpRemover_msg.print_removal = self.determineRemoval(msg.print_height, msg.material, msg.density, False)
+            pnpRemover_msg.print_removal = removal
             pnpRemover_msg.print_id = msg.printer_id
             pnpRemover_msg.shelf_num = slot
             self.pnpRemoverPub.publish(pnpRemover_msg)
