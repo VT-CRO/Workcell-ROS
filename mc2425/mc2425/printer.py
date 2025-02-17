@@ -90,7 +90,7 @@ class Printer(Node):
         else:
             self.get_logger().error("Service call failed!")
 
-    def sendFinishedPrint(self, density, material, height, name, author):
+    def sendFinishedPrint(self, xmax, xmin, density, material, height, name, author):
         if self.checkAvailability is not None:
             self.checkAvailability.cancel()
             self.checkAvailability = None
