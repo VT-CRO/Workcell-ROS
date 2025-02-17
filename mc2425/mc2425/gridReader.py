@@ -1,4 +1,5 @@
 import serial
+import argparse
 
 # Serial port configuration
 SERIAL_PORT = '/dev/ttyACM0'  # Your Pico's serial port
@@ -61,3 +62,11 @@ def shelf_status(index):
             return grid[index]
     except serial.SerialException as e:
         raise serial.SerialException(f"Error opening serial port: {e}")
+    
+if __name__ == "__main__":
+    # Test the shelf_status function
+    parser = argparse.ArgumentParser(description="Test the shelf_status function.")
+    parser.add_argument("index", type=int, help="The index to check (0-99).")
+    args = parser.parse_args()
+    status = shelf_status(args.index)
+    print(f"Shelf status at index {args.index}: {status}")

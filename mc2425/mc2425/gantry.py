@@ -59,9 +59,12 @@ class gantry(Node):
             if items[0] == "MOVE_COMPLETE":
                 _, print_id, shelf_num = items
                 if self.ensureReady(print_id, int(shelf_num)):
+                    self.get_logger().error("Shelf movement successful")
                     msg = Int32()
                     msg.data = int(print_id)
                     self.initiateReady.publish(msg)
+                else:
+                    self.get_logger().error("Shelf movement failed")
             else:
                 self.get_logger().error("Invalid message format")
         except ValueError:
