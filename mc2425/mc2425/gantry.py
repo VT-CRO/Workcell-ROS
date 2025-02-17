@@ -58,7 +58,7 @@ class gantry(Node):
             items = message.split(",")
             if items[0] == "MOVE_COMPLETE":
                 _, print_id, shelf_num = items
-                if self.ensureReady(print_id, shelf_num):
+                if self.ensureReady(print_id, int(shelf_num)):
                     msg = Int32()
                     msg.data = int(print_id)
                     self.initiateReady.publish(msg)
