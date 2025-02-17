@@ -49,21 +49,15 @@ class MainController(Node):
         self.shelf = partsShelf(SLOT_NUMBER, HEIGHT)
         self.get_logger().info(f"Main Controller initialized")
 
-    def determineRemoval(self, height, material, density, override):
-
-        """
-        TODO
-        multi_part
-        distance from sides
-        """
-
+    def determineRemoval(self, height, material, density, override, xmin, xmax):
         min_height = 100
         min_density = 5
         if(override):    
             return False
         if(material == 'tpu'):
             return False
-
+        if(xmin < 40 or xmax > 260):
+            return False
         if(min_height > height or min_density > density):
             return False
         else:
@@ -119,9 +113,9 @@ class MainController(Node):
 
     def addPart_callback(self, msg):
         self.get_logger().info(
-            f"Received: {msg.printer_id} {msg.print_height} {msg.part_name} {msg.author} {msg.material} {msg.density}"
+            f"Received: {msg.printer_id} {msg.print_height} {msg.part_name} {msg.author} {msg.material} {msg.density} {msg.xmin} {msg.xmax}"
         )
-        removal = self.determineRemoval(msg.print_height, msg.material, msg.density, False)
+        removal = self.determineRemoval(msg.print_height, msg.material, msg.density, False, msg.xmin, msg.xmax)
         if not removal:
             message, slot = self.addPart(msg.part_name, msg.author, msg.print_height)
         else:
