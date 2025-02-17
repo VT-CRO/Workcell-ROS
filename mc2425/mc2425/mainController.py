@@ -50,7 +50,7 @@ class MainController(Node):
         self.get_logger().info(f"Main Controller initialized")
 
     def determineRemoval(self, height, material, density, override, xmin, xmax):
-        min_height = 100
+        min_height = 5
         min_density = 5
         if(override):    
             return False
