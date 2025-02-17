@@ -1,5 +1,6 @@
 import serial
 import argparse
+import ast  # Import the ast module for safer parsing
 
 # Serial port configuration
 SERIAL_PORT = '/dev/ttyACM0'  # Your Pico's serial port
@@ -23,15 +24,15 @@ def read_grid(serial_connection):
             # Extract the list from the line
             list_str = line[len("Shelf Status List:"):].strip()
             try:
-                # Convert the string to a Python list
-                grid = eval(list_str)
+                # Use ast.literal_eval for safer parsing
+                grid = ast.literal_eval(list_str)
                 
                 # Validate the grid
-                if len(grid) == 100 and all(c in [0, 1] for c in grid):
+                if isinstance(grid, list) and len(grid) == 100 and all(c in [0, 1] for c in grid):
                     return grid
                 else:
                     raise ValueError("Invalid grid data received.")
-            except Exception as e:
+            except (SyntaxError, ValueError) as e:
                 raise ValueError(f"Error parsing grid data: {e}")
 
 def shelf_status(index):
