@@ -10,7 +10,7 @@ setup(
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
     ],
-    install_requires=["setuptools", "requests", "pynput"],
+    install_requires=["setuptools", "requests", "pynput","pyserial"],
     zip_safe=True,
     maintainer="andrew",
     maintainer_email="aviola@vt.edu",

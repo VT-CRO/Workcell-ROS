@@ -3,6 +3,7 @@ from rclpy.node import Node
 from std_msgs.msg import Int32
 from mc2425_msgs.msg import PnPRemoval
 from mc2425.unixSocketHandler import UnixSocketHandler
+from mc2425.gridReader import shelf_status
 import requests
 
 
@@ -41,7 +42,11 @@ class gantry(Node):
             
     def ensureReady(self, print_id, shelf_num):
         # TODO: Implement logic where it can go false
-        return True
+        inShelf = shelf_status(shelf_num)
+        if inShelf:
+            return False
+        else:
+            return True
             
     def handle_socket_message(self, message):
         """
