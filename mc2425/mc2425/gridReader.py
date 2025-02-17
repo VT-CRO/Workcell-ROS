@@ -7,34 +7,32 @@ BAUD_RATE = 115200  # Match the baud rate of your Pico
 
 def read_grid(serial_connection):
     """
-    Reads a 10x10 grid from the serial connection and converts it to a single list.
+    Reads a flattened grid list from the serial connection.
     Assumes the grid is sent in the format:
-    Shelf Status:
-    1 1 1 0 0 0 0 0 0 0
-    ...
+    Shelf Status List:
+    [1, 1, 1, 0, 0, 0, ..., 0]
     Returns:
-        A single list containing the grid values (row-major order).
+        A single list containing the grid values.
     """
-    grid = []
     while True:
         # Read a line from the serial connection
         line = serial_connection.readline().decode('utf-8').strip()
         
-        # Skip the "Shelf Status:" line
-        if line == "Shelf Status:":
-            continue
-        
-        # Parse grid rows
-        if line:
-            row = line.split()
-            if len(row) == 10 and all(c in '01' for c in row):
-                grid.extend([int(c) for c in row])  # Add row to the single list
-        
-        # Stop reading after 10 rows
-        if len(grid) == 100:
-            break
-    
-    return grid
+        # Look for the "Shelf Status List:" prefix
+        if line.startswith("Shelf Status List:"):
+            # Extract the list from the line
+            list_str = line[len("Shelf Status List:"):].strip()
+            try:
+                # Convert the string to a Python list
+                grid = eval(list_str)
+                
+                # Validate the grid
+                if len(grid) == 100 and all(c in [0, 1] for c in grid):
+                    return grid
+                else:
+                    raise ValueError("Invalid grid data received.")
+            except Exception as e:
+                raise ValueError(f"Error parsing grid data: {e}")
 
 def shelf_status(index):
     """
@@ -68,5 +66,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Test the shelf_status function.")
     parser.add_argument("index", type=int, help="The index to check (0-99).")
     args = parser.parse_args()
-    status = shelf_status(args.index)
-    print(f"Shelf status at index {args.index}: {status}")
+    try:
+        status = shelf_status(args.index)
+        print(f"Shelf status at index {args.index}: {status}")
+    except Exception as e:
+        print(f"Error: {e}")
