@@ -43,9 +43,6 @@ def read_grid(serial_connection):
                         raise ValueError("Invalid grid data received.")
                 except (SyntaxError, ValueError) as e:
                     raise ValueError(f"Error parsing grid data: {e}")
-            else:
-                # If no grid data was received, wait for it
-                print("Error: 'Shelf Status List:' received but no grid data found.")
 
 
 
