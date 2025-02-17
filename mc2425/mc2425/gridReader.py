@@ -23,6 +23,7 @@ def read_grid(serial_connection):
         if line.startswith("Shelf Status List:"):
             # Extract the list from the line
             list_str = line[len("Shelf Status List:"):].strip()
+            print(f"Raw data received: {list_str}")  # Debug: Print the raw data
             try:
                 # Use ast.literal_eval for safer parsing
                 grid = ast.literal_eval(list_str)
