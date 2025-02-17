@@ -44,9 +44,9 @@ class gantry(Node):
         # TODO: Implement logic where it can go false
         inShelf = shelf_status(shelf_num)
         if inShelf:
-            return False
-        else:
             return True
+        else:
+            return False
             
     def handle_socket_message(self, message):
         """
