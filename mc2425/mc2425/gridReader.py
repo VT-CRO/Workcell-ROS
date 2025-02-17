@@ -9,34 +9,46 @@ BAUD_RATE = 115200  # Match the baud rate of your Pico
 def read_grid(serial_connection):
     """
     Reads a flattened grid list from the serial connection.
+    Handles cases where the grid data is sent before or after the "Shelf Status List:" line.
     Assumes the grid is sent in the format:
     Shelf Status List:
     [1, 1, 1, 0, 0, 0, ..., 0]
     Returns:
         A single list containing the grid values.
     """
+    grid_data = None  # To store the grid data if it appears before the prefix
+
     while True:
         # Read a line from the serial connection
         line = serial_connection.readline().decode('utf-8').strip()
         print(f"Line received: {line}")  # Debug: Print every line received
-        
-        # Look for the "Shelf Status List:" prefix
-        if line.startswith("Shelf Status List:"):
-            # Extract the list from the line
-            list_str = line[len("Shelf Status List:"):].strip()
-            print(f"Raw data received: {list_str}")  # Debug: Print the raw data
-            try:
-                # Use ast.literal_eval for safer parsing
-                import ast
-                grid = ast.literal_eval(list_str)
-                
-                # Validate the grid
-                if isinstance(grid, list) and len(grid) == 100 and all(c in [0, 1] for c in grid):
-                    return grid
-                else:
-                    raise ValueError("Invalid grid data received.")
-            except (SyntaxError, ValueError) as e:
-                raise ValueError(f"Error parsing grid data: {e}")
+
+        # Check if the line contains the grid data
+        if line.startswith("[") and line.endswith("]"):
+            # This is the grid data
+            grid_data = line
+            print(f"Grid data found: {grid_data}")  # Debug: Print the grid data
+
+        # Check if the line is the "Shelf Status List:" prefix
+        elif line == "Shelf Status List:":
+            # If grid data was already received, parse it
+            if grid_data:
+                try:
+                    # Use ast.literal_eval for safer parsing
+                    import ast
+                    grid = ast.literal_eval(grid_data)
+                    
+                    # Validate the grid
+                    if isinstance(grid, list) and len(grid) == 100 and all(c in [0, 1] for c in grid):
+                        return grid
+                    else:
+                        raise ValueError("Invalid grid data received.")
+                except (SyntaxError, ValueError) as e:
+                    raise ValueError(f"Error parsing grid data: {e}")
+            else:
+                # If no grid data was received, wait for it
+                print("Error: 'Shelf Status List:' received but no grid data found.")
+
 
 
 def shelf_status(index):
