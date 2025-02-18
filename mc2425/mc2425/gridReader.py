@@ -1,10 +1,10 @@
 import serial
 import argparse
 import ast  # Import the ast module for safer parsing
+from mc2425.variables import SERIAL_PORT, BAUD_RATE
 
 # Serial port configuration
-SERIAL_PORT = '/dev/ttyACM0'  # Your Pico's serial port
-BAUD_RATE = 115200  # Match the baud rate of your Pico
+
 
 def read_grid(serial_connection):
     """

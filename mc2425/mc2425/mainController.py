@@ -4,6 +4,7 @@ from rclpy.node import Node
 from std_msgs.msg import Int32
 from mc2425_msgs.msg import AddPart
 from mc2425_msgs.msg import PnPRemoval
+from mc2425_msgs.msg import ShelfUpdate
 from mc2425_msgs.srv import FileTransfer
 from std_msgs.msg import String
 from std_srvs.srv import SetBool
@@ -36,6 +37,10 @@ class MainController(Node):
             String, "clearShelf", self.clearShelf_callback, 10
         )
         self.clearShelfSub  # prevent unused variable warning
+        self.shelfStatusSub = self.create_subscription(
+            ShelfUpdate, "shelf_status", self.shelfStatus_callback, 10
+        )
+        self.shelfStatusSub  # prevent unused variable warning
         self.pnpRemoverPub = self.create_publisher(PnPRemoval, "pnpRemover", 10)
         self.addPartFail = self.create_publisher(AddPart, "addPartFail", 10)
 
@@ -178,6 +183,27 @@ class MainController(Node):
             self.get_logger().info(f"Successful remove at #{shelfNum}")
         else:
             self.get_logger().info(f"No part found at #{shelfNum}")
+            
+    def shelfStatus_callback(self, msg):
+        shelfNum = msg.shelf_num
+        status = msg.status
+        msgType = msg.type
+        self.get_logger().info(f"Received: {shelfNum} {status}")
+        if msgType == "shelf":
+            if self.shelf.shelfChecker(shelfNum) is not None:
+                if status:
+                    self.get_logger().info(f"Plate located at shelf #{shelfNum}")
+                else:
+                    try:
+                        self.shelf.removePart(shelfNum)
+                        self.get_logger().info(f"Plate removed from shelf #{shelfNum}")
+                    except ValueError:
+                        self.get_logger().info(f"No part found at #{shelfNum}")
+        else:
+            if status:
+                self.get_logger().info(f"Plate located at plate bank #{shelfNum}")
+            else:
+                self.get_logger().info(f"Plate removed from plate bank #{shelfNum}")
 
 
 def main(args=None):
