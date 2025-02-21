@@ -38,7 +38,7 @@ class gantry(Node):
         response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
         result = response.json()
         self.get_logger().info(result["result"]["status"]["display_status"]["message"])
-        if result["result"]["status"]["display_status"]["message"] == "Ready" or result["result"]["status"]["display_status"]["message"] == None:
+        if result["result"]["status"]["display_status"]["message"] == "Ready" or result["result"]["status"]["display_status"]["message"] == "(null)":
             return True
         else:
             return False
