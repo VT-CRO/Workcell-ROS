@@ -72,11 +72,8 @@ class gantry(Node):
             
     def ensureReady(self, print_id, shelf_num):
         # TODO: Implement logic where it can go false
-        inShelf = shelf_status(shelf_num)
-        if inShelf:
-            return True
-        else:
-            return False
+        #inShelf = shelf_status(shelf_num)
+        return True
             
     def handle_socket_message(self, message):
         """
