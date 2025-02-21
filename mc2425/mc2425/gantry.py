@@ -34,14 +34,17 @@ class gantry(Node):
     def check_ready(self):
         url = "http://localhost/printer/objects/query"
         payload = {"objects": {"display_status": None}}
-        response = requests.post(url, json=payload, timeout=5)
-        response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
-        result = response.json()
-        self.get_logger().info(result["result"]["status"]["display_status"]["message"])
-        if result["result"]["status"]["display_status"]["message"] == "Ready" or result["result"]["status"]["display_status"]["message"] == "(null)":
-            return True
-        else:
-            return False
+        try:
+            response = requests.post(url, json=payload, timeout=5)
+            response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+            result = response.json()
+            self.get_logger().info(result["result"]["status"]["display_status"]["message"])
+            if result["result"]["status"]["display_status"]["message"] == "(null)":
+                return True
+            else:
+                return False
+        except:
+            pass
         
     def check_queue(self):
         if len(self.command_queue) != 0:
