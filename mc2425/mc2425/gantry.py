@@ -68,6 +68,7 @@ class gantry(Node):
             f"Received: {msg.print_removal} {msg.print_id} {msg.shelf_num}"
         )
         self.command_queue.append(msg)
+        self.check_queue()
             
     def ensureReady(self, print_id, shelf_num):
         # TODO: Implement logic where it can go false
