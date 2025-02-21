@@ -111,7 +111,7 @@ class Printer(Node):
             self.get_logger().info(
                 f"Received addPartFail for printer {self.printer_ID}"
             )
-            self.checkAvailability = self.create_timer(60,lambda: self.sendFinishedPrint(float(xmax), float(xmin), float(density), material, float(height), name, author))
+            self.checkAvailability = self.create_timer(60,lambda: self.sendFinishedPrint(float(msg.xmax), float(msg.xmin), float(msg.density), msg.material, float(msg.height), msg.name, msg.author))
         else:
             self.get_logger().info(f"Ignoring print request for printer {msg.data}")
 
