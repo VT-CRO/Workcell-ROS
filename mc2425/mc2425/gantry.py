@@ -38,8 +38,7 @@ class gantry(Node):
             response = requests.post(url, json=payload, timeout=5)
             response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
             result = response.json()
-            self.get_logger().info(result["result"]["status"]["display_status"]["message"])
-            if result["result"]["status"]["display_status"]["message"] == "(null)":
+            if result["result"]["status"]["display_status"]["message"] is None:
                 return True
             else:
                 return False
@@ -60,7 +59,7 @@ class gantry(Node):
                     data = {"script": f"MOVE_PLATE PRINTER_NUMBER={msg.print_id} SHELF_NUMBER={msg.shelf_num}"}
                     requests.post("http://localhost/printer/gcode/script", json=data)
             else:
-                self.get_logger().info("Gantry busy")
+                pass
         else:
             self.get_logger().info("Nothing to pick up")
 
