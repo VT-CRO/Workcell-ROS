@@ -25,20 +25,46 @@ class gantry(Node):
             logger=self.get_logger(),
         )
         self.socket_handler.setup_socket()
+        
+        self.command_queue = []
+        
+        self.timer_period = 0.5  # seconds
+        self.timer = self.create_timer(self.timer_period, self.check_queue)
+        
+    def check_ready(self):
+        url = "http://localhost/printer/objects/query"
+        payload = {"objects": {"display_status": None}}
+        response = requests.post(url, json=payload, timeout=5)
+        response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+        result = response.json()
+        if result["result"]["status"]["display_status"]["message"] == "Ready":
+            return True
+        else:
+            return False
+        
+    def check_queue(self):
+        if len(self.command_queue) != 0:
+            if self.check_ready():
+                msg = self.command_queue.pop(0)
+                if msg.print_removal:
+                    self.get_logger().info("Sending to the removal machine...")
+                    # TODO: Implement removal task
+                else:
+                    self.get_logger().info(
+                        f"Moving plate on printer {msg.print_id} to shelf #{msg.shelf_num}"
+                    )
+                    data = {"script": f"MOVE_PLATE PRINTER_NUMBER={msg.print_id} SHELF_NUMBER={msg.shelf_num}"}
+                    requests.post("http://localhost/printer/gcode/script", json=data)
+            else:
+                self.get_logger().info("Gantry busy")
+        else:
+            self.get_logger().info("Nothing to pick up")
 
     def pnp_callback(self, msg):
         self.get_logger().info(
             f"Received: {msg.print_removal} {msg.print_id} {msg.shelf_num}"
         )
-        if msg.print_removal:
-            self.get_logger().info("Sending to the removal machine...")
-            # TODO: Implement removal task
-        else:
-            self.get_logger().info(
-                f"Moving plate on printer {msg.print_id} to shelf #{msg.shelf_num}"
-            )
-            data = {"script": f"MOVE_PLATE PRINTER_NUMBER={msg.print_id} SHELF_NUMBER={msg.shelf_num}"}
-            requests.post("http://localhost/printer/gcode/script", json=data)
+        self.command_queue.append(msg)
             
     def ensureReady(self, print_id, shelf_num):
         # TODO: Implement logic where it can go false
