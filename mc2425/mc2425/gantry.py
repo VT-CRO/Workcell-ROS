@@ -28,7 +28,7 @@ class gantry(Node):
         
         self.command_queue = []
         
-        self.timer_period = 0.5  # seconds
+        self.timer_period = 5  # seconds
         self.timer = self.create_timer(self.timer_period, self.check_queue)
         
     def check_ready(self):
