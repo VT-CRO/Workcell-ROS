@@ -56,7 +56,7 @@ class gantry(Node):
                     self.get_logger().info(
                         f"Moving plate on printer {msg.print_id} to shelf #{msg.shelf_num}"
                     )
-                    data = {"script": f"MOVE_PLATE PRINTER_NUMBER={msg.print_id} SHELF_NUMBER={msg.shelf_num}"}
+                    data = {"script": f"MOVE_PLATE PRINTER_NUMBER={msg.print_id} SHELF_NUMBER={msg.shelf_num} PLATE_NUMBER={msg.plate_num}"}
                     requests.post("http://localhost/printer/gcode/script", json=data)
             else:
                 pass
@@ -65,7 +65,7 @@ class gantry(Node):
 
     def pnp_callback(self, msg):
         self.get_logger().info(
-            f"Received: {msg.print_removal} {msg.print_id} {msg.shelf_num}"
+            f"Received: {msg.print_removal} {msg.print_id} {msg.shelf_num} {msg.plate_num}"
         )
         self.command_queue.append(msg)
         self.check_queue()

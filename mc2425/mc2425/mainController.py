@@ -15,6 +15,7 @@ from mc2425.shelfClass import partsShelf
 from mc2425.gcode import gcode
 from mc2425.queueInteraction import download_gcode, checkStatus
 from mc2425.discordNotification import send_notification
+from mc2425.plate_bank_reading import get_average_distance_mm
 
 
 
@@ -124,17 +125,19 @@ class MainController(Node):
         removal = self.determineRemoval(msg.print_height, msg.material, msg.density, False, msg.xmin, msg.xmax)
         if not removal:
             message, slot = self.addPart(msg.part_name, msg.author, msg.print_height)
+            plate_num = self.determinePlate()
         else:
-            message, slot = -1,-1
+            message, slot, plate_num = -1,-1, -1
         self.get_logger().info(message)
         if slot != -1:
             pnpRemover_msg = PnPRemoval()
             pnpRemover_msg.print_removal = removal
             pnpRemover_msg.print_id = msg.printer_id
             pnpRemover_msg.shelf_num = slot
+            pnpRemover_msg.plate_num = plate_num
             self.pnpRemoverPub.publish(pnpRemover_msg)
             self.get_logger().info(
-                f"Publishing: Removal: {pnpRemover_msg.print_removal}, Printer Number: {pnpRemover_msg.print_id}, Slot Number: {pnpRemover_msg.shelf_num}"
+                f"Publishing: Removal: {pnpRemover_msg.print_removal}, Printer Number: {pnpRemover_msg.print_id}, Slot Number: {pnpRemover_msg.shelf_num}, Plate Bank: {pnpRemover_msg.plate_num}"
             )
             send_notification(
                 f"<@{msg.author}> Part: **{msg.part_name}** is ready for pick up in slot: **{slot}**"
@@ -204,7 +207,25 @@ class MainController(Node):
                 self.get_logger().info(f"Plate located at plate bank #{shelfNum}")
             else:
                 self.get_logger().info(f"Plate removed from plate bank #{shelfNum}")
-
+                
+    def determinePlate(self):
+        distance = get_average_distance_mm()
+        if 55 <= distance < 65:
+            return 1
+        elif 65 <= distance < 75:
+            return 2
+        elif 75 <= distance < 85:
+            return 3
+        elif 85 <= distance < 95:
+            return 4
+        elif 95 <= distance < 105:
+            return 5
+        elif 105 <= distance < 115:
+            return 6
+        elif 115 <= distance < 125:
+            return 7
+        elif 125 <= distance < 135:
+            return 8
 
 def main(args=None):
     rclpy.init(args=args)
