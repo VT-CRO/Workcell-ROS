@@ -16,6 +16,7 @@ from mc2425.gcode import gcode
 from mc2425.queueInteraction import download_gcode, checkStatus
 from mc2425.discordNotification import send_notification
 from mc2425.plate_bank_reading import get_average_distance_mm
+from mc2425.gridReader import shelf_status
 
 
 
@@ -122,6 +123,7 @@ class MainController(Node):
         self.get_logger().info(
             f"Received: {msg.printer_id} {msg.print_height} {msg.part_name} {msg.author} {msg.material} {msg.density} {msg.xmin} {msg.xmax}"
         )
+        self.checkCurrentParts()
         removal = self.determineRemoval(msg.print_height, msg.material, msg.density, False, msg.xmin, msg.xmax)
         if not removal:
             message, slot = self.addPart(msg.part_name, msg.author, msg.print_height)
@@ -171,6 +173,7 @@ class MainController(Node):
 
     def shelfCheck_callback(self, msg):
         shelfNum = msg.data
+        self.checkCurrentParts()
         self.get_logger().info(f"Received: {shelfNum}")
         part = self.shelf.shelfChecker(shelfNum)
         if part is not None:
@@ -187,6 +190,17 @@ class MainController(Node):
         else:
             self.get_logger().info(f"No part found at #{shelfNum}")
             
+    def checkCurrentParts(self):
+        for slot in self.shelf.limitSwitchPlated:
+            status = shelf_status(slot)
+            if status == 0:
+                remove = self.shelf.removePart(slot)
+                if remove:
+                    self.shelf.limitSwitchPlated.remove(slot)
+                    self.get_logger().info(f"Successful remove at #{slot}")
+                else:
+                    self.get_logger().info(f"No part found at #{slot}")
+                    
     def shelfStatus_callback(self, msg):
         shelfNum = msg.shelf_num
         status = msg.status

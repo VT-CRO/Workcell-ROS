@@ -42,6 +42,7 @@ class partsShelf:
                     self.slotNumber = data["slotNumber"]
                     self.height = data["height"]
                     self.slotSize = data["slotSize"]
+                    self.limitSwitchPlated = data["switchArray"]
                     self.slots = data["slots"]
                     self.parts = data["parts"]
                     needNewDatabase = False
@@ -65,6 +66,7 @@ class partsShelf:
                 self.slotSize = 0  # Avoid division by zero
             self.slots = [None] * self.slotNumber
             self.parts = {}
+            self.limitSwitchPlated = []
             print(f"Initialized new empty shelf. Saving to '{database}'")
             self._save()  # Save the initial empty state
 
@@ -189,11 +191,12 @@ class partsShelf:
                 fill_slot_index = start_index + i # Fill from bottom up
                 self.slots[fill_slot_index] = current_name
 
+            self.limitSwitchPlated.append(end_index)
             self._save()
             print(
                 f"Part '{current_name}' added, occupying slots {start_index} to {end_index}."
             )
-            return True, start_index
+            return True, end_index
         else:
             # This message is reached only if the loop completes without finding a spot
             print(
@@ -202,39 +205,43 @@ class partsShelf:
             )
             return False, None
 
-    def removePart(self, start: int):
+    def removePart(self, end: int): # Changed parameter name and type hint if desired
         """
-        Removes the gcode from the shelving unit based on its starting slot index.
+        Removes the gcode from the shelving unit based on its ENDING slot index.
 
-        :param start: The lowest slot number (index) where the gcode starts.
+        :param end: The highest slot number (index) where the gcode ends.
+                    <--- Updated docstring description
         :return: True if removal was successful, False otherwise.
         """
-        if not isinstance(start, int) or start < 0:
-             print(f"Error: Invalid start slot index '{start}'. Must be a non-negative integer.")
+        if not isinstance(end, int) or end < 0:
+             print(f"Error: Invalid end slot index '{end}'. Must be a non-negative integer.")
              return False
 
         part_key_to_remove = None
-        # Find the part key associated with the given start index
+        # Find the part key associated with the given END index
         for key, data in self.parts.items():
-            # Ensure 'Start' key exists before accessing
-            if data.get("Start") == start:
+            # --- CHANGE THIS LINE ---
+            # Ensure 'End' key exists and compare with the input 'end' parameter
+            if data.get("End") == end:
+            # --- END CHANGE ---
                 part_key_to_remove = key
-                break
+                break # Found the part
 
         if part_key_to_remove:
             part_data = self.parts[part_key_to_remove]
+            # Retrieve the actual start and end indices from the stored data
             start_idx = part_data.get("Start", -1)
-            end_idx = part_data.get("End", -1)
+            end_idx = part_data.get("End", -1) # Should match the input 'end'
 
-            # Validate indices before proceeding
-            if start_idx == -1 or end_idx == -1 or end_idx < start_idx:
-                 print(f"Error: Corrupted part data for '{part_key_to_remove}'. Cannot remove.")
-                 # Optionally, attempt to clean up self.parts here
+            # Validate indices before proceeding (important sanity check)
+            if start_idx == -1 or end_idx == -1 or end_idx < start_idx or end_idx != end:
+                 print(f"Error: Corrupted or inconsistent part data found for key '{part_key_to_remove}' when trying to remove based on end index {end}. Stored data: {part_data}")
+                 # Optionally attempt cleanup if data seems corrupt
                  # self.parts.pop(part_key_to_remove, None)
                  # self._save()
                  return False
 
-            # Clear the slots occupied by this part
+            # Clear the slots occupied by this part (using the retrieved start/end)
             for slot_index in range(start_idx, end_idx + 1):
                 # Boundary check for safety
                 if 0 <= slot_index < self.slotNumber:
@@ -254,7 +261,8 @@ class partsShelf:
             self._save()
             return True
         else:
-            print(f"Error: No part found starting at slot index {start}.")
+            # Updated error message for clarity
+            print(f"Error: No part found ending at slot index {end}.")
             return False
 
     def clearShelf(self):
@@ -285,6 +293,7 @@ class partsShelf:
             "slotNumber": self.slotNumber,
             "height": self.height,
             "slotSize": self.slotSize,
+            "switchArray": self.limitSwitchPlated,
             "slots": self.slots,
             "parts": self.parts,
         }
