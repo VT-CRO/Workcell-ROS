@@ -142,7 +142,7 @@ class MainController(Node):
                 f"Publishing: Removal: {pnpRemover_msg.print_removal}, Printer Number: {pnpRemover_msg.print_id}, Slot Number: {pnpRemover_msg.shelf_num}, Plate Bank: {pnpRemover_msg.plate_num}"
             )
             send_notification(
-                f"<@{msg.author}> Part: **{msg.part_name}** is ready for pick up in slot: **{slot}**"
+                f"<@{msg.author}> Part: **{msg.part_name}** is ready for pick up in slot: **{int(slot)+1}**"
             )
             try:
                 self.printerParts.remove(msg.part_name)
