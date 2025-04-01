@@ -224,22 +224,26 @@ class MainController(Node):
                 
     def determinePlate(self):
         distance = get_average_distance_mm()
-        if 55 <= distance < 65:
+        if 55 <= distance < 63:
             return 1
-        elif 65 <= distance < 75:
+        elif 63 <= distance < 73:
             return 2
-        elif 75 <= distance < 85:
+        elif 73 <= distance < 83:
             return 3
-        elif 85 <= distance < 95:
+        elif 83 <= distance < 92:
             return 4
-        elif 95 <= distance < 105:
+        elif 92 <= distance < 101.75:
             return 5
-        elif 105 <= distance < 115:
+        elif 101.75 <= distance < 108.5:
             return 6
-        elif 115 <= distance < 125:
+        elif 108.5 <= distance < 116:
             return 7
-        elif 125 <= distance < 135:
+        elif 116 <= distance < 127:
             return 8
+        elif 127 <= distance < 140:
+            return 9
+        else:
+            return 1
 
 def main(args=None):
     rclpy.init(args=args)

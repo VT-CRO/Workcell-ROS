@@ -132,7 +132,7 @@ def get_average_distance_mm(
             #    print(f" Reading {i+1}: Failed (Timeout or lgpio error)")
 
             if i < num_readings - 1: # Don't delay after the last reading
-                 time.sleep(read_delay_s)
+                 time.sleep(0.01)
 
         if not distances_mm:
             # print("No valid readings obtained.", file=sys.stderr) # Optional debug
@@ -172,11 +172,11 @@ if __name__ == '__main__':
         print("Failed to get measurement.")
 
     # Example 2: Using custom settings (e.g., more readings)
-    print("\nTaking measurement with 5 readings...")
-    avg_dist_custom = get_average_distance_mm(num_readings=5, read_delay_s=0.2)
+    print("\nTaking measurement with 10 readings...")
+    avg_dist_custom = get_average_distance_mm(num_readings=10, read_delay_s=0.2)
     if avg_dist_custom is not None:
         print("-" * 25)
-        print(f"Average Distance (5 readings): {avg_dist_custom:.1f} mm")
+        print(f"Average Distance (10 readings): {avg_dist_custom:.1f} mm")
         print("-" * 25)
     else:
         print("Failed to get measurement with custom settings.")
