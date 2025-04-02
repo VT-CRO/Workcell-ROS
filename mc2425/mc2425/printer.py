@@ -48,7 +48,7 @@ class Printer(Node):
         )
         self.socket_handler.setup_socket()
         self.requestGcodeBool = True
-        self.requestGcode("")
+        #self.requestGcode("")
 
     def handle_socket_message(self, message):
         """
