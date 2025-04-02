@@ -89,6 +89,12 @@ class MainController(Node):
         """
         Handles G-code file transfer requests.
         """
+        if not checkStatus():
+            response.success = False
+            response.message = "Queue is offline"
+            self.get_logger().info(response.message)
+            return response
+            
         filename = download_gcode()
         if filename == -1:
             response.success = False

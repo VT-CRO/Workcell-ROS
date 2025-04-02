@@ -17,6 +17,7 @@ class Printer(Node):
         if self.printer_ID == -1:
             self.get_logger().error("Printer ID not set")
             return
+        
         self.finishedPrintPub = self.create_publisher(AddPart, "finishedPrint", 10)
 
         self.newPrintSub = self.create_subscription(
@@ -46,6 +47,8 @@ class Printer(Node):
             logger=self.get_logger(),
         )
         self.socket_handler.setup_socket()
+        self.requestGcodeBool = True
+        self.requestGcode("")
 
     def handle_socket_message(self, message):
         """
@@ -62,6 +65,9 @@ class Printer(Node):
                 self.requestGcode("")
             elif items[0] == "STATUS":
                 self.checkOnline()
+            elif items[0] == "TURN_OFF":
+                self.get_logger().info("Turning off queue")
+                self.requestGcodeBool = False
             else:
                 self.get_logger().error("Invalid message format")
         except ValueError:
@@ -135,14 +141,18 @@ class Printer(Node):
         """
         Request a G-code file from MainController.
         """
-        if self.checkForNewGcode is not None:
-            self.checkForNewGcode.cancel()
-            self.checkForNewGcode = None
-        request = FileTransfer.Request()
-        request.filename = filename
-        self.get_logger().info(f"Requesting G-code file: {filename}")
-        future = self.request_gcode_client.call_async(request)
-        future.add_done_callback(self.handle_gcode_response)
+        if self.requestGcodeBool:
+            if self.checkForNewGcode is not None:
+                self.checkForNewGcode.cancel()
+                self.checkForNewGcode = None
+            request = FileTransfer.Request()
+            request.filename = filename
+            self.get_logger().info(f"Requesting G-code file: {filename}")
+            future = self.request_gcode_client.call_async(request)
+            future.add_done_callback(self.handle_gcode_response)
+        else:
+            self.get_logger().info("G-code request disabled")
+            self.requestGcodeBool = True
 
     def handle_gcode_response(self, future):
         """
