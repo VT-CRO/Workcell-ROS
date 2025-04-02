@@ -7,6 +7,16 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+# Get the username from SUDO_USER if available, otherwise use current user
+if [ -n "$SUDO_USER" ]; then
+    RUN_USER=$SUDO_USER
+else
+    RUN_USER=$(whoami)
+fi
+
+HOME_DIR=$(eval echo ~$RUN_USER)
+echo "Using home directory: $HOME_DIR"
+
 # Prompt for system type
 echo "Which MC2425 component would you like to run on startup?"
 echo "1) Main Controller"
@@ -15,11 +25,31 @@ echo "3) Printer"
 read -p "Enter choice [1-3]: " choice
 
 case $choice in
-    1) SYSTEM_TYPE="main" ;;
-    2) SYSTEM_TYPE="gantry" ;;
-    3) SYSTEM_TYPE="printer" ;;
-    *) echo "Invalid choice"; exit 1 ;;
+    1) 
+        SYSTEM_TYPE="main"
+        ENV_VARS="Environment=\"MC2425_SYSTEM_TYPE=main\""
+        ;;
+    2) 
+        SYSTEM_TYPE="gantry"
+        ENV_VARS="Environment=\"MC2425_SYSTEM_TYPE=gantry\""
+        ;;
+    3) 
+        SYSTEM_TYPE="printer"
+        read -p "Enter printer ID: " printer_id
+        ENV_VARS="Environment=\"MC2425_SYSTEM_TYPE=printer\"\nEnvironment=\"PRINTER_ID=$printer_id\""
+        ;;
+    *) 
+        echo "Invalid choice"
+        exit 1 
+        ;;
 esac
+
+# Create required directories
+echo "Creating required directories..."
+mkdir -p $HOME_DIR/test
+mkdir -p $HOME_DIR/gcode
+chown -R $RUN_USER:$RUN_USER $HOME_DIR/test $HOME_DIR/gcode
+chmod -R 755 $HOME_DIR/test $HOME_DIR/gcode
 
 # Create starter script
 cat > /usr/local/bin/mc2425_starter.py << 'EOF'
@@ -52,6 +82,7 @@ def main():
     ros_setup = "source /opt/ros/jazzy/setup.bash"
     
     # Find path to your workspace setup
+    # Using find command to locate setup.bash in home directory
     workspace_setup = "source ~/Workcell-ROS/install/setup.bash"
     
     # Determine which component to run
@@ -77,11 +108,12 @@ After=network.target
 
 [Service]
 Type=simple
-User=$SUDO_USER
+User=$RUN_USER
+WorkingDirectory=$HOME_DIR
 ExecStart=/usr/local/bin/mc2425_starter.py
 Restart=on-failure
 RestartSec=5
-Environment="MC2425_SYSTEM_TYPE=$SYSTEM_TYPE"
+$(echo -e $ENV_VARS)
 
 [Install]
 WantedBy=multi-user.target
@@ -90,7 +122,14 @@ EOF
 # Enable and start the service
 systemctl daemon-reload
 systemctl enable mc2425.service
-systemctl start mc2425.service
+systemctl restart mc2425.service
 
 echo "MC2425 $SYSTEM_TYPE has been set to start on boot!"
 echo "Check status with: sudo systemctl status mc2425.service"
+echo ""
+echo "Important notes:"
+echo "- Directories $HOME_DIR/test and $HOME_DIR/gcode have been created"
+echo "- The service is set to run as user: $RUN_USER"
+echo "- The working directory is set to: $HOME_DIR"
+echo "- Restart with: sudo systemctl restart mc2425.service"
+echo "- View logs with: sudo journalctl -u mc2425.service"
