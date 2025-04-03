@@ -82,7 +82,7 @@ install_component() {
 # ROS2 startup script for $component
 
 # Source ROS2 environment
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 source $HOME_DIR/Workcell-ROS/install/setup.bash
 
 # Set ROS2 network configuration
