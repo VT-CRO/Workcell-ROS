@@ -17,33 +17,6 @@ fi
 HOME_DIR=$(eval echo ~$RUN_USER)
 echo "Using home directory: $HOME_DIR"
 
-# Prompt for system type
-echo "Which MC2425 component would you like to run on startup?"
-echo "1) Main Controller"
-echo "2) Gantry"
-echo "3) Printer"
-read -p "Enter choice [1-3]: " choice
-
-case $choice in
-    1) 
-        SYSTEM_TYPE="main"
-        ENV_VARS="Environment=\"MC2425_SYSTEM_TYPE=main\""
-        ;;
-    2) 
-        SYSTEM_TYPE="gantry"
-        ENV_VARS="Environment=\"MC2425_SYSTEM_TYPE=gantry\""
-        ;;
-    3) 
-        SYSTEM_TYPE="printer"
-        read -p "Enter printer ID: " printer_id
-        ENV_VARS="Environment=\"MC2425_SYSTEM_TYPE=printer\"\nEnvironment=\"PRINTER_ID=$printer_id\""
-        ;;
-    *) 
-        echo "Invalid choice"
-        exit 1 
-        ;;
-esac
-
 # Create required directories
 echo "Creating required directories..."
 mkdir -p $HOME_DIR/test
@@ -51,7 +24,7 @@ mkdir -p $HOME_DIR/gcode
 chown -R $RUN_USER:$RUN_USER $HOME_DIR/test $HOME_DIR/gcode
 chmod -R 755 $HOME_DIR/test $HOME_DIR/gcode
 
-# Create starter script
+# Create starter script that takes component name as argument
 cat > /usr/local/bin/mc2425_starter.py << 'EOF'
 #!/usr/bin/env python3
 import os
@@ -65,33 +38,24 @@ COMPONENTS = {
     "printer": "ros2 run mc2425 printer"
 }
 
-def determine_system_type():
-    """
-    Determine which system is running based on environment variables or hostname
-    """
-    # Check for environment variable first
-    system_type = os.environ.get("MC2425_SYSTEM_TYPE")
-    if system_type and system_type in COMPONENTS:
-        return system_type
-        
-    # Default to main if cannot determine
-    return "main"
-
 def main():
+    # Get component from command line argument
+    if len(sys.argv) < 2 or sys.argv[1] not in COMPONENTS:
+        print(f"Usage: {sys.argv[0]} [main|gantry|printer]")
+        sys.exit(1)
+    
+    component = sys.argv[1]
+    component_cmd = COMPONENTS[component]
+    
     # Source ROS environment
     ros_setup = "source /opt/ros/jazzy/setup.bash"
     
     # Find path to your workspace setup
-    # Using find command to locate setup.bash in home directory
     workspace_setup = "source ~/Workcell-ROS/install/setup.bash"
-    
-    # Determine which component to run
-    system_type = determine_system_type()
-    component_cmd = COMPONENTS[system_type]
     
     # Run the commands
     full_cmd = f"{ros_setup} && {workspace_setup} && {component_cmd}"
-    print(f"Starting mc2425 {system_type} component...")
+    print(f"Starting mc2425 {component} component...")
     os.system(f"bash -c '{full_cmd}'")
 
 if __name__ == "__main__":
@@ -100,36 +64,77 @@ EOF
 
 chmod +x /usr/local/bin/mc2425_starter.py
 
-# Create systemd service
-cat > /etc/systemd/system/mc2425.service << EOF
+# Function to install a component service
+install_component() {
+    local component=$1
+    local printer_id=$2
+    local service_name="mc2425-${component}"
+    
+    echo "Installing $service_name service..."
+    
+    # Create specific environment variables
+    local env_vars="Environment=\"MC2425_SYSTEM_TYPE=$component\""
+    if [ "$component" == "printer" ] && [ -n "$printer_id" ]; then
+        env_vars="$env_vars\nEnvironment=\"PRINTER_ID=$printer_id\""
+    fi
+    
+    # Create systemd service
+    cat > /etc/systemd/system/$service_name.service << EOF
 [Unit]
-Description=MC2425 ROS2 System
+Description=MC2425 ROS2 $component Component
 After=network.target
 
 [Service]
 Type=simple
 User=$RUN_USER
 WorkingDirectory=$HOME_DIR
-ExecStart=/usr/local/bin/mc2425_starter.py
+ExecStart=/usr/local/bin/mc2425_starter.py $component
 Restart=on-failure
 RestartSec=5
-$(echo -e $ENV_VARS)
+$(echo -e $env_vars)
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-# Enable and start the service
-systemctl daemon-reload
-systemctl enable mc2425.service
-systemctl restart mc2425.service
+    # Enable and start the service
+    systemctl daemon-reload
+    systemctl enable $service_name.service
+    systemctl restart $service_name.service
+    
+    echo "$service_name service has been installed and started!"
+}
 
-echo "MC2425 $SYSTEM_TYPE has been set to start on boot!"
-echo "Check status with: sudo systemctl status mc2425.service"
+# Multi-select menu for components
+echo "Select which components to run on this machine (enter numbers separated by space):"
+echo "1) Main Controller"
+echo "2) Gantry"
+echo "3) Printer"
+read -p "Enter choices [e.g. 1 2 3]: " choices
+
+for choice in $choices; do
+    case $choice in
+        1) 
+            install_component "main" ""
+            ;;
+        2) 
+            install_component "gantry" ""
+            ;;
+        3) 
+            read -p "Enter printer ID: " printer_id
+            install_component "printer" "$printer_id"
+            ;;
+        *) 
+            echo "Invalid choice: $choice (skipping)"
+            ;;
+    esac
+done
+
 echo ""
+echo "Installation complete!"
 echo "Important notes:"
 echo "- Directories $HOME_DIR/test and $HOME_DIR/gcode have been created"
-echo "- The service is set to run as user: $RUN_USER"
+echo "- Services are set to run as user: $RUN_USER"
 echo "- The working directory is set to: $HOME_DIR"
-echo "- Restart with: sudo systemctl restart mc2425.service"
-echo "- View logs with: sudo journalctl -u mc2425.service"
+echo "- Check status of services with: sudo systemctl status mc2425-*.service"
+echo "- View logs with: sudo journalctl -u mc2425-main.service (replace 'main' with component name)"
