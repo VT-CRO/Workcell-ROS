@@ -58,18 +58,19 @@ class MainController(Node):
         self.get_logger().info(f"Main Controller initialized")
 
     def determineRemoval(self, height, material, density, override, xmin, xmax):
-        min_height = 50
-        min_density = 5
-        if(override):    
-            return False
-        if(material == 'tpu'):
-            return False
-        if(xmin < 40 or xmax > 260):
-            return False
-        if(min_height > height or min_density > density):
-            return False
-        else:
-            return True
+        return False
+        # min_height = 50
+        # min_density = 5
+        # if(override):    
+        #     return False
+        # if(material == 'tpu'):
+        #     return False
+        # if(xmin < 40 or xmax > 260):
+        #     return False
+        # if(min_height > height or min_density > density):
+        #     return False
+        # else:
+        #     return True
         
 
     def addPart(self, name, author, height):
