@@ -1,6 +1,6 @@
 #!/bin/bash
 # Installation script for MC2425 ROS2 autostart
-
+# THIS IS A NEW VERSION
 # Verify root privileges
 if [ "$(id -u)" -ne 0 ]; then
     echo "This script must be run as root" 
