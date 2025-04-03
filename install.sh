@@ -37,7 +37,7 @@ import sys
 
 # Define possible components to run
 COMPONENTS = {
-    "main": "ros2 run mc2425 mainController",
+    "mainController": "ros2 run mc2425 mainController",
     "gantry": "ros2 run mc2425 gantry",
     "printer": "ros2 run mc2425 printer"
 }
@@ -45,7 +45,7 @@ COMPONENTS = {
 def main():
     # Get component from command line argument
     if len(sys.argv) < 2 or sys.argv[1] not in COMPONENTS:
-        print(f"Usage: {sys.argv[0]} [main|gantry|printer]")
+        print(f"Usage: {sys.argv[0]} [mainController|gantry|printer]")
         sys.exit(1)
     
     component = sys.argv[1]
@@ -132,7 +132,7 @@ read -p "Enter choices [e.g. 1 2 3]: " choices
 for choice in $choices; do
     case $choice in
         1) 
-            install_component "main" ""
+            install_component "mainController" ""
             ;;
         2) 
             install_component "gantry" ""
@@ -156,7 +156,7 @@ echo "- The working directory is set to: $HOME_DIR"
 echo "- ROS_DOMAIN_ID is set to: $ros_domain_id (ensure all machines use the same value)"
 echo "- ROS_LOCALHOST_ONLY is set to 0 (enabling network communication)"
 echo "- Check status of services with: sudo systemctl status mc2425-*.service"
-echo "- View logs with: sudo journalctl -u mc2425-main.service (replace 'main' with component name)"
+echo "- View logs with: sudo journalctl -u mc2425-mainController.service (or other component names)"
 echo ""
 echo "If nodes can't communicate between machines, check:"
 echo "1. Ensure both machines can ping each other"
