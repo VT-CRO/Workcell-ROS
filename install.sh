@@ -1,6 +1,6 @@
 #!/bin/bash
 # Installation script for MC2425 ROS2 autostart
-# THIS IS A NEW VERSION
+
 # Verify root privileges
 if [ "$(id -u)" -ne 0 ]; then
     echo "This script must be run as root" 
@@ -16,6 +16,10 @@ fi
 
 HOME_DIR=$(eval echo ~$RUN_USER)
 echo "Using home directory: $HOME_DIR"
+
+# Prompt for ROS_DOMAIN_ID
+read -p "Enter ROS_DOMAIN_ID for network communication (0-232, default: 42): " ros_domain_id
+ros_domain_id=${ros_domain_id:-42}
 
 # Create required directories
 echo "Creating required directories..."
@@ -47,16 +51,9 @@ def main():
     component = sys.argv[1]
     component_cmd = COMPONENTS[component]
     
-    # Source ROS environment
-    ros_setup = "source /opt/ros/jazzy/setup.bash"
-    
-    # Find path to your workspace setup
-    workspace_setup = "source ~/Workcell-ROS/install/setup.bash"
-    
     # Run the commands
-    full_cmd = f"{ros_setup} && {workspace_setup} && {component_cmd}"
     print(f"Starting mc2425 {component} component...")
-    os.system(f"bash -c '{full_cmd}'")
+    os.system(component_cmd)
 
 if __name__ == "__main__":
     main()
@@ -78,6 +75,26 @@ install_component() {
         env_vars="$env_vars\nEnvironment=\"PRINTER_ID=$printer_id\""
     fi
     
+    # Create ROS startup script with proper environment sourcing
+    local ros_starter="/usr/local/bin/start_${component}.sh"
+    cat > $ros_starter << EOF
+#!/bin/bash
+# ROS2 startup script for $component
+
+# Source ROS2 environment
+source /opt/ros/humble/setup.bash
+source $HOME_DIR/Workcell-ROS/install/setup.bash
+
+# Set ROS2 network configuration
+export ROS_DOMAIN_ID=$ros_domain_id
+export ROS_LOCALHOST_ONLY=0
+
+# Execute the component
+exec ros2 run mc2425 $component
+EOF
+
+    chmod +x $ros_starter
+    
     # Create systemd service
     cat > /etc/systemd/system/$service_name.service << EOF
 [Unit]
@@ -88,7 +105,7 @@ After=network.target
 Type=simple
 User=$RUN_USER
 WorkingDirectory=$HOME_DIR
-ExecStart=/usr/local/bin/mc2425_starter.py $component
+ExecStart=$ros_starter
 Restart=on-failure
 RestartSec=5
 $(echo -e $env_vars)
@@ -136,5 +153,12 @@ echo "Important notes:"
 echo "- Directories $HOME_DIR/test and $HOME_DIR/gcode have been created"
 echo "- Services are set to run as user: $RUN_USER"
 echo "- The working directory is set to: $HOME_DIR"
+echo "- ROS_DOMAIN_ID is set to: $ros_domain_id (ensure all machines use the same value)"
+echo "- ROS_LOCALHOST_ONLY is set to 0 (enabling network communication)"
 echo "- Check status of services with: sudo systemctl status mc2425-*.service"
 echo "- View logs with: sudo journalctl -u mc2425-main.service (replace 'main' with component name)"
+echo ""
+echo "If nodes can't communicate between machines, check:"
+echo "1. Ensure both machines can ping each other"
+echo "2. Verify firewalls allow ROS2 communication"
+echo "3. Make sure ROS_DOMAIN_ID is identical on all machines"
