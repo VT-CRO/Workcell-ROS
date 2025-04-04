@@ -111,7 +111,7 @@ class partsShelf:
              print(f"Warning: Part '{part.getName()}' has zero or negative height ({part_height}mm). Skipping.")
              return False, None # Cannot place a part with no height
 
-        slotsTaken = math.ceil(part_height / self.slotSize)
+        slotsTaken = math.ceil((part_height + 10.0)/ self.slotSize)
 
         if slotsTaken > self.slotNumber:
             print(

@@ -1,0 +1,74 @@
+{
+    "slotNumber": 28,
+    "height": 840,
+    "slotSize": 30.0,
+    "switchArray": [
+        0,
+        1,
+        2,
+        3,
+        4
+    ],
+    "slots": [
+        "VT",
+        "VT1",
+        "VT2",
+        "VT3",
+        "VT4",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+    ],
+    "parts": {
+        "VT": {
+            "Start": 0,
+            "End": 0,
+            "Duplicate": 0,
+            "Base": "VT"
+        },
+        "VT1": {
+            "Start": 1,
+            "End": 1,
+            "Duplicate": 1,
+            "Base": "VT"
+        },
+        "VT2": {
+            "Start": 2,
+            "End": 2,
+            "Duplicate": 2,
+            "Base": "VT"
+        },
+        "VT3": {
+            "Start": 3,
+            "End": 3,
+            "Duplicate": 3,
+            "Base": "VT"
+        },
+        "VT4": {
+            "Start": 4,
+            "End": 4,
+            "Duplicate": 4,
+            "Base": "VT"
+        }
+    }
+}
